@@ -1,0 +1,688 @@
+<?php
+// helpers/functions.php - VERSION COMPLÈTE CORRIGÉE
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// ============================================
+// AUTHENTIFICATION
+// ============================================
+
+/**
+ * Vérifier si l'utilisateur est connecté
+ */
+function isLoggedIn() {
+    return isset($_SESSION['user_id']) && !empty($_SESSION['user_id']) && is_numeric($_SESSION['user_id']);
+}
+
+/**
+ * Vérifier si l'utilisateur est authentifié pour l'API
+ */
+function isApiAuthenticated() {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    return isset($_SESSION['user_id']) && !empty($_SESSION['user_id']) && is_numeric($_SESSION['user_id']);
+}
+
+/**
+ * Rediriger vers une URL
+ */
+function redirect($url) {
+    if (!headers_sent()) {
+        header('Location: ' . $url);
+        exit;
+    } else {
+        echo '<script>window.location.href="' . $url . '";</script>';
+        echo '<noscript><meta http-equiv="refresh" content="0;url=' . $url . '"></noscript>';
+        exit;
+    }
+}
+
+// ============================================
+// VALIDATION DE SESSION
+// ============================================
+
+/**
+ * Vérifier l'intégrité de la session
+ */
+function validateSession() {
+    if (!isLoggedIn()) {
+        return false;
+    }
+    
+    $currentIP = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+    $currentUA = $_SERVER['HTTP_USER_AGENT'] ?? '';
+    $currentSessionId = session_id();
+    
+    if (isset($_SESSION['ip_address']) && $_SESSION['ip_address'] !== $currentIP) {
+        destroySession('IP modifiée');
+        return false;
+    }
+    
+    if (isset($_SESSION['user_agent']) && $_SESSION['user_agent'] !== $currentUA) {
+        destroySession('User-Agent modifié');
+        return false;
+    }
+    
+    if (isset($_SESSION['session_id']) && $_SESSION['session_id'] !== $currentSessionId) {
+        $_SESSION['session_id'] = $currentSessionId;
+    }
+    
+    $maxLifetime = 3600;
+    if (isset($_SESSION['login_time']) && (time() - $_SESSION['login_time']) > $maxLifetime) {
+        destroySession('Session expirée');
+        return false;
+    }
+    
+    $_SESSION['last_activity'] = time();
+    
+    return true;
+}
+
+/**
+ * Détruire la session proprement
+ */
+function destroySession($reason = '') {
+    if ($reason) {
+        error_log("🔒 Session détruite: $reason - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+    }
+    
+    $_SESSION = array();
+    
+    if (ini_get("session.use_cookies")) {
+        $params = session_get_cookie_params();
+        setcookie(
+            session_name(),
+            '',
+            time() - 42000,
+            $params["path"],
+            $params["domain"],
+            $params["secure"],
+            $params["httponly"]
+        );
+    }
+    
+    session_destroy();
+    
+    setFlash('danger', 'Session invalide. Veuillez vous reconnecter.');
+    redirect('index.php?page=login');
+    exit;
+}
+
+// ============================================
+// CSRF PROTECTION
+// ============================================
+
+/**
+ * Générer un token CSRF
+ */
+function generateCSRFToken() {
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+/**
+ * Vérifier le token CSRF
+ */
+function verifyCSRFToken($token) {
+    return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
+}
+
+/**
+ * Champ CSRF pour les formulaires
+ */
+function csrfField() {
+    return '<input type="hidden" name="csrf_token" value="' . generateCSRFToken() . '">';
+}
+
+// ============================================
+// GESTION DES RÔLES
+// ============================================
+
+/**
+ * Vérifier si l'utilisateur a un rôle spécifique
+ */
+function hasRole($role) {
+    return isset($_SESSION['user_role']) && $_SESSION['user_role'] === $role;
+}
+
+/**
+ * Vérifier si l'utilisateur a un rôle minimum
+ */
+function hasMinRole($minRole) {
+    $roles = [
+        'commercial' => 1,
+        'charge_etude_climatisation' => 2,
+        'charge_etude_courant_faible' => 3,
+        'charge_etude_electricite' => 4,
+        'responsable_travaux' => 5,
+        'responsable_sav' => 6,
+        'responsable_support_technique' => 7,
+        'coordinateur' => 8,
+        'admin' => 9
+    ];
+    
+    $userRole = $_SESSION['user_role'] ?? 'commercial';
+    
+    if (!isset($roles[$userRole]) || !isset($roles[$minRole])) {
+        if ($userRole === 'admin') {
+            return true;
+        }
+        return false;
+    }
+    
+    return $roles[$userRole] >= $roles[$minRole];
+}
+
+/**
+ * Vérifier si l'utilisateur est administrateur
+ */
+function isAdmin() {
+    return hasRole('admin');
+}
+
+/**
+ * Vérifier si l'utilisateur est coordinateur
+ */
+function isCoordinateur() {
+    return hasRole('coordinateur');
+}
+
+/**
+ * Vérifier si l'utilisateur est commercial
+ */
+function isCommercial() {
+    return hasRole('commercial');
+}
+
+/**
+ * Vérifier si l'utilisateur est responsable
+ */
+function isResponsable() {
+    $responsableRoles = [
+        'responsable_support_technique',
+        'responsable_sav',
+        'responsable_travaux'
+    ];
+    $userRole = $_SESSION['user_role'] ?? '';
+    return in_array($userRole, $responsableRoles);
+}
+
+/**
+ * Vérifier si l'utilisateur est chargé d'étude
+ */
+function isChargeEtude() {
+    $chargeRoles = [
+        'charge_etude_electricite',
+        'charge_etude_courant_faible',
+        'charge_etude_climatisation'
+    ];
+    $userRole = $_SESSION['user_role'] ?? '';
+    return in_array($userRole, $chargeRoles);
+}
+
+// ============================================
+// PERMISSIONS PLANNING
+// ============================================
+
+/**
+ * Vérifier si l'utilisateur peut voir le planning
+ */
+function canViewPlanningOnly() {
+    $role = $_SESSION['user_role'] ?? 'commercial';
+    
+    $allowedRoles = [
+        'admin',
+        'coordinateur',
+        'responsable_support_technique',
+        'responsable_sav',
+        'responsable_travaux',
+        'charge_etude_electricite',
+        'charge_etude_courant_faible',
+        'charge_etude_climatisation',
+        'commercial'
+    ];
+    
+    return in_array($role, $allowedRoles);
+}
+
+/**
+ * Vérifier si l'utilisateur peut gérer le planning
+ */
+function canManagePlanning() {
+    $role = $_SESSION['user_role'] ?? 'commercial';
+    
+    $allowedRoles = [
+        'admin',
+        'coordinateur',
+        'responsable_support_technique',
+        'responsable_sav',
+        'responsable_travaux'
+    ];
+    
+    return in_array($role, $allowedRoles);
+}
+
+// ============================================
+// PERMISSIONS D'ACCÈS AUX PAGES
+// ============================================
+
+/**
+ * Vérifier si l'utilisateur peut accéder à une page
+ */
+function canAccessPage($page) {
+    if (!isLoggedIn()) {
+        return $page === 'login' || $page === 'register';
+    }
+    
+    $role = $_SESSION['user_role'] ?? 'commercial';
+    
+    $publicPages = ['dashboard', 'profile', 'logout', 'change_password', 'historique', 'messages'];
+    if (in_array($page, $publicPages)) {
+        return true;
+    }
+    
+    if ($role === 'admin') {
+        return true;
+    }
+    
+    if ($role === 'coordinateur') {
+        return $page !== 'users';
+    }
+    
+    if (in_array($role, ['responsable_support_technique', 'responsable_sav', 'responsable_travaux'])) {
+        return $page !== 'users';
+    }
+    
+    if (in_array($role, ['charge_etude_electricite', 'charge_etude_courant_faible', 'charge_etude_climatisation'])) {
+        return $page !== 'users';
+    }
+    
+    if ($role === 'commercial') {
+        return $page !== 'users' && $page !== 'export';
+    }
+    
+    return false;
+}
+
+// ============================================
+// PERMISSIONS SPÉCIFIQUES
+// ============================================
+
+/**
+ * Vérifier si l'utilisateur peut gérer les utilisateurs
+ */
+function canManageUsers() {
+    $role = $_SESSION['user_role'] ?? 'commercial';
+    return $role === 'admin';
+}
+
+/**
+ * Vérifier si l'utilisateur peut exporter les données
+ */
+function canExportData() {
+    $role = $_SESSION['user_role'] ?? 'commercial';
+    return in_array($role, [
+        'admin', 
+        'coordinateur',
+        'responsable_support_technique', 
+        'responsable_sav', 
+        'responsable_travaux',
+        'charge_etude_electricite',
+        'charge_etude_courant_faible',
+        'charge_etude_climatisation'
+    ]);
+}
+
+/**
+ * Vérifier si l'utilisateur peut supprimer un ticket
+ */
+function canDeleteTicket($ticket = null) {
+    $role = $_SESSION['user_role'] ?? 'commercial';
+    
+    if ($role === 'admin') {
+        return true;
+    }
+    
+    $responsableRoles = [
+        'responsable_sav',
+        'responsable_travaux',
+        'responsable_support_technique'
+    ];
+    
+    if (in_array($role, $responsableRoles)) {
+        if ($ticket && isset($ticket['category'])) {
+            $categoryMap = [
+                'sav' => 'responsable_sav',
+                'travaux' => 'responsable_travaux',
+                'support_technique' => 'responsable_support_technique',
+                'bureau_etude' => 'responsable_support_technique'
+            ];
+            $requiredRole = $categoryMap[$ticket['category']] ?? null;
+            return $role === $requiredRole;
+        }
+        return true;
+    }
+    
+    return false;
+}
+
+// ============================================
+// AFFICHAGE DES RÔLES
+// ============================================
+
+/**
+ * Récupérer le label d'un rôle
+ */
+function getRoleLabel($role) {
+    $labels = [
+        'admin' => 'Administrateur',
+        'coordinateur' => 'Coordinateur / Coordinatrice',
+        'responsable_support_technique' => 'Responsable Support Technique',
+        'responsable_sav' => 'Responsable SAV',
+        'responsable_travaux' => 'Responsable Travaux',
+        'commercial' => 'Commercial',
+        'charge_etude_electricite' => 'Chargé d\'Étude Electricité',
+        'charge_etude_courant_faible' => 'Chargé d\'Étude Courant Faible',
+        'charge_etude_climatisation' => 'Chargé d\'Étude Climatisation'
+    ];
+    return $labels[$role] ?? $role;
+}
+
+/**
+ * Récupérer l'icône d'un rôle
+ */
+function getRoleIcon($role) {
+    $icons = [
+        'admin' => 'fa-crown',
+        'coordinateur' => 'fa-user-tie',
+        'responsable_support_technique' => 'fa-flask',
+        'responsable_sav' => 'fa-headset',
+        'responsable_travaux' => 'fa-hard-hat',
+        'commercial' => 'fa-handshake',
+        'charge_etude_electricite' => 'fa-bolt',
+        'charge_etude_courant_faible' => 'fa-wifi',
+        'charge_etude_climatisation' => 'fa-snowflake'
+    ];
+    return $icons[$role] ?? 'fa-user';
+}
+
+/**
+ * Récupérer la classe CSS pour l'avatar d'un rôle
+ */
+function getRoleAvatarClass($role) {
+    $classes = [
+        'admin' => 'bg-red-500',
+        'coordinateur' => 'bg-purple-500',
+        'responsable_support_technique' => 'bg-indigo-500',
+        'responsable_sav' => 'bg-pink-500',
+        'responsable_travaux' => 'bg-amber-500',
+        'commercial' => 'bg-blue-500',
+        'charge_etude_electricite' => 'bg-orange-500',
+        'charge_etude_courant_faible' => 'bg-cyan-500',
+        'charge_etude_climatisation' => 'bg-emerald-500'
+    ];
+    return $classes[$role] ?? 'bg-gray-500';
+}
+
+/**
+ * Récupérer la couleur d'un rôle
+ */
+function getRoleColor($role) {
+    $colors = [
+        'admin' => '#EF4444',
+        'coordinateur' => '#8B5CF6',
+        'responsable_support_technique' => '#4F46E5',
+        'responsable_sav' => '#EC4899',
+        'responsable_travaux' => '#F59E0B',
+        'commercial' => '#3B82F6',
+        'charge_etude_electricite' => '#F97316',
+        'charge_etude_courant_faible' => '#06B6D4',
+        'charge_etude_climatisation' => '#10B981'
+    ];
+    return $colors[$role] ?? '#6B7280';
+}
+
+/**
+ * Récupérer l'équipe d'un utilisateur
+ */
+function getUserTeam($role) {
+    $teams = [
+        'responsable_support_technique' => 'Support Technique',
+        'charge_etude_electricite' => 'Support Technique',
+        'charge_etude_courant_faible' => 'Support Technique',
+        'charge_etude_climatisation' => 'Support Technique',
+        'responsable_sav' => 'SAV',
+        'responsable_travaux' => 'Travaux',
+        'commercial' => 'Commercial',
+        'coordinateur' => 'Coordination',
+        'admin' => 'Administration'
+    ];
+    return $teams[$role] ?? 'Autre';
+}
+
+// ============================================
+// GESTION DES TICKETS
+// ============================================
+
+/**
+ * Générer un numéro de ticket UNIQUE - CORRIGÉ
+ */
+function generateTicketNumber($category = null) {
+    $db = Database::getInstance();
+    
+    $prefix = 'TK-';
+    $suffix = '';
+    
+    switch ($category) {
+        case 'support_technique':
+        case 'bureau_etude':
+            $prefix = 'TK-ST';
+            $suffix = '-BE';
+            break;
+        case 'sav':
+            $prefix = 'TK-SAV';
+            break;
+        case 'travaux':
+            $prefix = 'TK-TVX';
+            break;
+        default:
+            $prefix = 'TK-NTC';
+            break;
+    }
+    
+    $year = date('Y');
+    $month = date('m');
+    $day = date('d');
+    
+    // ✅ UTILISER UN TIMESTAMP POUR ÉVITER LES DOUBLONS
+    $timestamp = date('YmdHis');
+    $random = str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT);
+    
+    // ✅ GÉNÉRER LE NUMÉRO
+    $ticketNumber = $prefix . $year . $month . $day . '-' . $timestamp . '-' . $random;
+    
+    // ✅ BOUCLE DE SÉCURITÉ POUR ÉVITER LES DOUBLONS
+    $existing = $db->fetch(
+        "SELECT id FROM tickets WHERE ticket_number = ?",
+        [$ticketNumber]
+    );
+    
+    $counter = 0;
+    while ($existing && $counter < 10) {
+        $random = str_pad(rand(0, 99999), 5, '0', STR_PAD_LEFT);
+        $ticketNumber = $prefix . $year . $month . $day . '-' . $timestamp . '-' . $random;
+        $existing = $db->fetch(
+            "SELECT id FROM tickets WHERE ticket_number = ?",
+            [$ticketNumber]
+        );
+        $counter++;
+    }
+    
+    error_log("📝 generateTicketNumber() - Numéro généré: " . $ticketNumber);
+    
+    return $ticketNumber;
+}
+
+/**
+ * Nettoyer une chaîne de caractères
+ */
+function sanitize($input) {
+    return htmlspecialchars(strip_tags(trim($input)));
+}
+
+// ============================================
+// GESTION DES FLASH MESSAGES
+// ============================================
+
+/**
+ * Définir un message flash
+ */
+function setFlash($type, $message) {
+    $_SESSION['flash'] = ['type' => $type, 'message' => $message];
+}
+
+/**
+ * Récupérer et supprimer un message flash
+ */
+function getFlash() {
+    if (isset($_SESSION['flash'])) {
+        $flash = $_SESSION['flash'];
+        unset($_SESSION['flash']);
+        return $flash;
+    }
+    return null;
+}
+
+// ============================================
+// FORMATAGE DES DATES
+// ============================================
+
+/**
+ * Formater une date
+ */
+function formatDate($date, $format = 'd/m/Y H:i') {
+    if (!$date) return '-';
+    return date($format, strtotime($date));
+}
+
+/**
+ * Formater une date (uniquement la date)
+ */
+function formatDateOnly($date, $format = 'd/m/Y') {
+    if (!$date) return '-';
+    return date($format, strtotime($date));
+}
+
+// ============================================
+// LABELS DES TICKETS
+// ============================================
+
+/**
+ * Récupérer le label d'un statut
+ */
+function getStatusLabel($status) {
+    $map = [
+        'nouveau' => 'Nouveau',
+        'assigne' => 'Assigné',
+        'en_cours' => 'En cours',
+        'en_attente' => 'En attente',
+        'resolu' => 'Résolu',
+        'cloture' => 'Clôturé'
+    ];
+    return $map[$status] ?? $status;
+}
+
+/**
+ * Récupérer le label d'une priorité
+ */
+function getPriorityLabel($priority) {
+    $map = [
+        'basse' => 'Basse',
+        'moyenne' => 'Moyenne',
+        'haute' => 'Haute',
+        'critique' => 'Critique'
+    ];
+    return $map[$priority] ?? $priority;
+}
+
+/**
+ * Récupérer le label d'une catégorie
+ */
+function getCategoryLabel($category) {
+    $map = [
+        'support_technique' => 'Support Technique',
+        'sav' => 'SAV',
+        'bureau_etude' => 'Bureau d\'Étude',
+        'travaux' => 'Travaux'
+    ];
+    return $map[$category] ?? $category;
+}
+
+/**
+ * Récupérer le label d'un type de demande
+ */
+function getTypeDemandeLabel($type) {
+    $map = [
+        'etude' => 'Étude',
+        'visite' => 'Visite',
+        'visite_etude' => 'Visite + Étude',
+        'visite_etude_installation' => 'Visite + Étude + Installation',
+        'installation' => 'Installation',
+        'maintenance' => 'Maintenance',
+        'panne' => 'Panne',
+        'urgence' => 'Urgence',
+        'sav' => 'SAV',
+        'travaux' => 'Travaux',
+        'support' => 'Support',
+        'autre' => 'Autre'
+    ];
+    return $map[$type] ?? $type;
+}
+
+// ============================================
+// UTILITAIRES
+// ============================================
+
+/**
+ * Tronquer un texte
+ */
+function truncateText($text, $length = 100, $suffix = '...') {
+    if (strlen($text) <= $length) {
+        return $text;
+    }
+    return substr($text, 0, $length) . $suffix;
+}
+
+/**
+ * Récupérer le nom de l'utilisateur actuel
+ */
+function getCurrentUserName() {
+    return $_SESSION['user_name'] ?? 'Utilisateur';
+}
+
+/**
+ * Récupérer le rôle de l'utilisateur actuel
+ */
+function getCurrentUserRole() {
+    return $_SESSION['user_role'] ?? 'commercial';
+}
+
+/**
+ * Récupérer l'ID de l'utilisateur actuel
+ */
+function getCurrentUserId() {
+    return $_SESSION['user_id'] ?? 0;
+}
+
+/**
+ * Récupérer le label du rôle de l'utilisateur actuel
+ */
+function getCurrentUserRoleLabel() {
+    return getRoleLabel(getCurrentUserRole());
+}
+?>

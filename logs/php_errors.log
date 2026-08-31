@@ -1,0 +1,3 @@
+[23-Jul-2026 07:54:29 UTC] PHP Fatal error:  Cannot redeclare isApiAuthenticated() (previously declared in C:\wamp64\www\ticketing_plateform\api_handler.php:27) in C:\wamp64\www\ticketing_plateform\includes\functions.php on line 15
+[23-Jul-2026 07:54:29 UTC] PHP Stack trace:
+[23-Jul-2026 07:54:29 UTC] PHP   1. {main}() C:\wamp64\www\ticketing_plateform\api_handler.php:0
