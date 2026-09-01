@@ -567,13 +567,45 @@ function generateTicketNumber($category = null) {
     }
     
     $year = date('Y');
-    $likePattern = $prefix . $year . '%';
-    $count = $db->fetch(
-        "SELECT COUNT(*) as count FROM tickets WHERE ticket_number LIKE ?",
-        [$likePattern]
-    );
     
-    $nextNumber = ($count ? (int)$count['count'] : 0) + 1;
+    // ✅ COMPTEUR ATOMIQUE (remplace l'ancien COUNT(*) non fiable)
+    // L'ancien système comptait les tickets existants pour déduire le
+    // prochain numéro : sous forte concurrence (2 créations quasi
+    // simultanées), les deux requêtes lisaient le même COUNT avant
+    // qu'aucune insertion ne soit commitée => même numéro généré deux fois.
+    //
+    // Ici on utilise la table `ticket_sequences` avec l'idiome MySQL
+    // "INSERT ... ON DUPLICATE KEY UPDATE ... LAST_INSERT_ID(expr)",
+    // qui est garanti atomique au niveau du moteur InnoDB : deux
+    // connexions concurrentes ne peuvent jamais obtenir le même numéro.
+    // ⚠️ Nécessite la table créée par sql/migration_ticket_sequences.sql
+    try {
+        $pdo = $db->getPDO();
+        $stmt = $pdo->prepare(
+            "INSERT INTO ticket_sequences (category_prefix, year, next_number)
+             VALUES (?, ?, LAST_INSERT_ID(1))
+             ON DUPLICATE KEY UPDATE next_number = LAST_INSERT_ID(next_number + 1)"
+        );
+        $stmt->execute([$prefix, $year]);
+        $nextNumber = (int)$pdo->lastInsertId();
+        
+        // Sécurité supplémentaire : ne jamais accepter 0 comme numéro
+        if ($nextNumber < 1) {
+            throw new Exception("Compteur invalide retourné (0), fallback nécessaire");
+        }
+    } catch (Exception $e) {
+        // Filet de sécurité si la table de séquence n'existe pas encore
+        // (migration non appliquée) : on retombe sur l'ancien comportement
+        // en dégradé plutôt que de planter la création de ticket.
+        error_log("⚠️ ticket_sequences indisponible, fallback COUNT(): " . $e->getMessage());
+        $likePattern = $prefix . $year . '%';
+        $count = $db->fetch(
+            "SELECT COUNT(*) as count FROM tickets WHERE ticket_number LIKE ?",
+            [$likePattern]
+        );
+        $nextNumber = ($count ? (int)$count['count'] : 0) + 1;
+    }
+    
     $number = str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
     
     return $prefix . $year . '-' . $number . $suffix;

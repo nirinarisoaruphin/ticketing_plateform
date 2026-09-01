@@ -15,14 +15,14 @@ $isCommercial = ($role === 'commercial');
     <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
         <div>
             <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-3">
-                <i class="fas fa-history text-indigo-600"></i>
+                <!--<i class="fas fa-history text-indigo-600"></i>!-->
                 Historique des notifications
                 <span class="text-sm font-medium text-gray-400 bg-gray-100 px-3 py-1 rounded-full">
                     <?= count($notifications) + count($activities) ?> élément(s)
                 </span>
             </h1>
             <p class="text-gray-500 mt-1">
-                <i class="fas fa-info-circle text-indigo-400 mr-1"></i>
+                <!--<i class="fas fa-info-circle text-indigo-400 mr-1"></i>!-->
                 Consultez toutes vos notifications et activités
             </p>
         </div>

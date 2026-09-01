@@ -362,6 +362,8 @@ if (!$canCreate) {
         </div>
         
         <form method="POST" enctype="multipart/form-data" class="p-6" id="ticketForm">
+            <!-- ✅ Jeton anti double-soumission : un seul usage possible côté serveur -->
+            <input type="hidden" name="submission_token" value="<?= htmlspecialchars($submissionToken ?? '') ?>">
             <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
             
             <!-- ÉTAPE 1 : INFORMATIONS GÉNÉRALES -->
@@ -1014,12 +1016,40 @@ document.addEventListener('DOMContentLoaded', function() {
             if (activeStep) {
                 const step = parseInt(activeStep.dataset.step);
                 if (step === totalSteps && submitBtn.style.display !== 'none') {
-                    document.getElementById('ticketForm').submit();
+                    // ✅ Empêche la soumission native du navigateur en plus de celle-ci
+                    // (sinon Entrée déclenchait 2 POST => tickets en double)
+                    e.preventDefault();
+                    submitTicketForm();
                 } else if (step < totalSteps && !nextBtn.classList.contains('hidden')) {
+                    e.preventDefault();
                     nextStep();
                 }
             }
         }
+    });
+    
+    // ✅ PROTECTION ANTI DOUBLE-SOUMISSION
+    // Empêche la création de tickets en doublon suite à un double-clic,
+    // un appui répété sur Entrée, ou une double soumission du formulaire.
+    const ticketForm = document.getElementById('ticketForm');
+    let formAlreadySubmitted = false;
+
+    function submitTicketForm() {
+        if (formAlreadySubmitted) return;
+        formAlreadySubmitted = true;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi en cours...';
+        ticketForm.submit();
+    }
+
+    ticketForm.addEventListener('submit', function(e) {
+        if (formAlreadySubmitted) {
+            e.preventDefault();
+            return false;
+        }
+        formAlreadySubmitted = true;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi en cours...';
     });
     
     updateStep(1);

@@ -158,30 +158,73 @@ class TicketController {
         $pageTitle = 'Nouveau ticket';
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // ✅ ANTI DOUBLE-SOUMISSION — JETON À USAGE UNIQUE
+            // Protection définitive, indépendante de tout bug JS ou de
+            // course SQL : chaque affichage du formulaire génère un jeton
+            // stocké en session. Au premier POST valide, on le supprime
+            // immédiatement de la session. Toute 2e soumission (double-clic,
+            // double appui Entrée, requête rejouée, ancien JS non à jour...)
+            // arrivera avec soit ce même jeton déjà consommé, soit un jeton
+            // absent → elle est bloquée avant toute insertion en base.
+            $submittedToken = $_POST['submission_token'] ?? '';
+            $validToken = isset($_SESSION['ticket_submission_token'])
+                && $submittedToken !== ''
+                && hash_equals($_SESSION['ticket_submission_token'], $submittedToken);
+            
+            if (!$validToken) {
+                error_log("⛔ Soumission de ticket bloquée : jeton invalide ou déjà utilisé (double-soumission)");
+                if ($this->isAjax()) {
+                    $this->jsonResponse([
+                        'success' => false,
+                        'duplicate' => true,
+                        'message' => 'Ce ticket a déjà été soumis.',
+                        'redirect' => 'index.php?page=tickets'
+                    ]);
+                }
+                setFlash('warning', 'Ce ticket a déjà été soumis. Si vous ne le voyez pas encore dans la liste, patientez quelques secondes.');
+                redirect('index.php?page=tickets');
+            }
+            // Jeton consommé immédiatement : impossible de le réutiliser,
+            // même si le navigateur renvoie deux fois le même formulaire.
+            unset($_SESSION['ticket_submission_token']);
+            
             $category = isset($_POST['category']) ? $_POST['category'] : 'support_technique';
             $typeDemande = isset($_POST['type_demande']) ? $_POST['type_demande'] : 'etude';
             
             $db = Database::getInstance();
             
-            // ✅ MAPPING CATÉGORIE → RESPONSABLE AVEC ID DIRECT
-            // ⚠️ VÉRIFIEZ CES ID AVEC VOTRE BASE DE DONNÉES
-            $categoryResponsibleIdMap = [
-                'support_technique' => 16,  // ID du responsable support technique
-                'bureau_etude' => 16,       // ID du responsable bureau d'étude
-                'sav' => 15,                // ID du responsable SAV
-                'travaux' => 14             // ID du responsable travaux
+            // ✅ MAPPING CATÉGORIE → RÔLE DU RESPONSABLE (PAS D'ID EN DUR)
+            // Les ID utilisateurs peuvent changer (suppression, réinstallation, etc.),
+            // on retrouve donc le responsable par son RÔLE, pas par un ID fixe.
+            $categoryResponsibleRoleMap = [
+                'support_technique' => 'responsable_support_technique', // Mahery
+                'bureau_etude'      => 'responsable_support_technique', // Mahery
+                'sav'               => 'responsable_sav',               // Dina
+                'travaux'           => 'responsable_travaux'            // Andry
             ];
             
-            // ✅ RÉCUPÉRER L'ID DIRECTEMENT
-            $assignedTo = $categoryResponsibleIdMap[$category] ?? null;
+            $assignedTo = null;
+            $responsibleRole = $categoryResponsibleRoleMap[$category] ?? null;
+            
+            if ($responsibleRole) {
+                // ✅ RÉCUPÉRER L'UTILISATEUR ACTIF AYANT CE RÔLE
+                $responsible = $db->fetch(
+                    "SELECT id FROM users WHERE role = ? AND active = 1 ORDER BY id ASC LIMIT 1",
+                    [$responsibleRole]
+                );
+                if ($responsible) {
+                    $assignedTo = $responsible['id'];
+                    error_log("✅ Responsable assigné (ID: " . $assignedTo . ", rôle: $responsibleRole) pour la catégorie: " . $category);
+                } else {
+                    error_log("⚠️ Aucun utilisateur actif trouvé pour le rôle '$responsibleRole'");
+                }
+            }
             
             // ✅ SI AUCUN RESPONSABLE TROUVÉ, ASSIGNER L'ADMIN
             if ($assignedTo === null) {
-                $admin = $db->fetch("SELECT id FROM users WHERE role = 'admin' LIMIT 1");
+                $admin = $db->fetch("SELECT id FROM users WHERE role = 'admin' AND active = 1 LIMIT 1");
                 $assignedTo = $admin ? $admin['id'] : 1;
                 error_log("⚠️ Aucun responsable trouvé, assignation à l'admin (ID: " . $assignedTo . ")");
-            } else {
-                error_log("✅ Responsable assigné (ID: " . $assignedTo . ") pour la catégorie: " . $category);
             }
             
             // ✅ GÉNÉRER LE NUMÉRO DE TICKET
@@ -206,6 +249,37 @@ class TicketController {
             
             $userName = $_SESSION['user_name'] ?? 'Utilisateur';
             $userRole = $_SESSION['user_role'] ?? 'commercial';
+            
+            // ✅ ANTI DOUBLE-SOUMISSION (garde-fou serveur)
+            // Bloque une 2e création si un ticket quasi identique vient d'être
+            // créé par le même utilisateur il y a moins de 10 secondes
+            // (double-clic, double appui Entrée, requêtes concurrentes...).
+            $recentDuplicate = $db->fetch(
+                "SELECT id FROM tickets 
+                 WHERE created_by = ? 
+                   AND category = ? 
+                   AND description = ? 
+                   AND created_at >= (NOW() - INTERVAL 10 SECOND)
+                 LIMIT 1",
+                [
+                    $_SESSION['user_id'],
+                    $category,
+                    sanitize($_POST['description'] ?? '')
+                ]
+            );
+            
+            if ($recentDuplicate) {
+                error_log("⛔ Double-soumission détectée et bloquée (ticket existant ID: " . $recentDuplicate['id'] . ")");
+                if ($this->isAjax()) {
+                    $this->jsonResponse([
+                        'success' => true,
+                        'duplicate' => true,
+                        'message' => 'Ticket déjà créé.',
+                        'redirect' => 'index.php?page=tickets&action=show&id=' . $recentDuplicate['id']
+                    ]);
+                }
+                redirect('index.php?page=tickets&action=show&id=' . $recentDuplicate['id']);
+            }
             
             // ✅ Validation des champs requis
             $errors = [];
@@ -443,6 +517,10 @@ class TicketController {
                 redirect('index.php?page=tickets&action=create');
             }
         }
+        
+        // ✅ Générer un nouveau jeton anti double-soumission pour ce formulaire
+        $submissionToken = bin2hex(random_bytes(32));
+        $_SESSION['ticket_submission_token'] = $submissionToken;
         
         require_once __DIR__ . '/../views/tickets/create.php';
     }

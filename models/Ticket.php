@@ -361,14 +361,36 @@ class Ticket extends Model {
         $sql = "INSERT INTO tickets (" . implode(', ', array_keys($filteredData)) . ") 
                 VALUES (" . implode(', ', $placeholders) . ")";
         
-        try {
-            $result = $this->db->insert($sql, array_values($filteredData));
-            error_log("✅ Ticket créé avec succès - ID: " . $result);
-            return $result;
-        } catch (Exception $e) {
-            error_log("❌ Ticket::create Error: " . $e->getMessage());
-            return false;
+        // ✅ RETRY AUTOMATIQUE EN CAS DE COLLISION DE ticket_number
+        // Filet de sécurité final : même avec le compteur atomique,
+        // on retente en cas d'erreur de clé dupliquée (ex: contrainte
+        // UNIQUE ajoutée après coup sur une base contenant déjà des
+        // doublons, ou tout autre cas imprévu).
+        $maxAttempts = 3;
+        for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
+            try {
+                $result = $this->db->insert($sql, array_values($filteredData));
+                error_log("✅ Ticket créé avec succès - ID: " . $result);
+                return $result;
+            } catch (Exception $e) {
+                $isDuplicateKey = stripos($e->getMessage(), 'Duplicate entry') !== false
+                    || stripos($e->getMessage(), '1062') !== false;
+                
+                if ($isDuplicateKey && $attempt < $maxAttempts && isset($filteredData['ticket_number'])) {
+                    error_log("⚠️ Collision ticket_number (tentative $attempt), régénération...");
+                    $category = $filteredData['category'] ?? 'support_technique';
+                    $filteredData['ticket_number'] = generateTicketNumber($category) . '-' . strtoupper(substr(md5(uniqid()), 0, 4));
+                    $sql = "INSERT INTO tickets (" . implode(', ', array_keys($filteredData)) . ") 
+                            VALUES (" . implode(', ', array_fill(0, count($filteredData), '?')) . ")";
+                    continue;
+                }
+                
+                error_log("❌ Ticket::create Error: " . $e->getMessage());
+                return false;
+            }
         }
+        
+        return false;
     }
     
     public function update($id, $data) {
