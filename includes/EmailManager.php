@@ -331,15 +331,15 @@ class EmailManager {
                     <p style="font-size:14px;color:#475569;margin:0 0 20px 0;">Un nouveau ticket a été créé sur la plateforme.</p>
                     <div style="background:#f8fafc;border-radius:12px;padding:20px;border-left:4px solid #2563eb;margin-bottom:20px;">
                         <table style="width:100%;border-collapse:collapse;font-size:14px;">
-                            <tr><td style="padding:6px 0;color:#64748b;width:120px;">🔹 Numéro</td><td style="padding:6px 0;font-weight:600;color:#0f172a;">' . $ticketNumber . '</td></tr>
-                            <tr><td style="padding:6px 0;color:#64748b;">📝 Titre</td><td style="padding:6px 0;font-weight:600;color:#0f172a;">' . htmlspecialchars($title) . '</td></tr>
-                            <tr><td style="padding:6px 0;color:#64748b;">📊 Statut</td><td style="padding:6px 0;"><span style="background:#dbeafe;color:#1e40af;padding:2px 12px;border-radius:20px;font-size:13px;font-weight:600;">' . $statusLabel . '</span></td></tr>
-                            <tr><td style="padding:6px 0;color:#64748b;">🎯 Priorité</td><td style="padding:6px 0;"><span style="background:#fef3c7;color:#92400e;padding:2px 12px;border-radius:20px;font-size:13px;font-weight:600;">' . $priorityLabel . '</span></td></tr>
-                            <tr><td style="padding:6px 0;color:#64748b;">📂 Catégorie</td><td style="padding:6px 0;font-weight:600;color:#0f172a;">' . $categoryLabel . '</td></tr>
-                            <tr><td style="padding:6px 0;color:#64748b;">👤 Créé par</td><td style="padding:6px 0;font-weight:600;color:#0f172a;">' . htmlspecialchars($createdByName) . '</td></tr>
-                            <tr><td style="padding:6px 0;color:#64748b;">📅 Date</td><td style="padding:6px 0;font-weight:600;color:#0f172a;">' . $createdAt . '</td></tr>
+                            <tr><td style="padding:6px 0;color:#64748b;width:120px;">Numéro :</td><td style="padding:6px 0;font-weight:600;color:#0f172a;">' . $ticketNumber . '</td></tr>
+                            <tr><td style="padding:6px 0;color:#64748b;">Titre :</td><td style="padding:6px 0;font-weight:600;color:#0f172a;">' . htmlspecialchars($title) . '</td></tr>
+                            <tr><td style="padding:6px 0;color:#64748b;">Statut :</td><td style="padding:6px 0;"><span style="background:#dbeafe;color:#1e40af;padding:2px 12px;border-radius:20px;font-size:13px;font-weight:600;">' . $statusLabel . '</span></td></tr>
+                            <tr><td style="padding:6px 0;color:#64748b;">Priorité :</td><td style="padding:6px 0;"><span style="background:#fef3c7;color:#92400e;padding:2px 12px;border-radius:20px;font-size:13px;font-weight:600;">' . $priorityLabel . '</span></td></tr>
+                            <tr><td style="padding:6px 0;color:#64748b;">Catégorie :</td><td style="padding:6px 0;font-weight:600;color:#0f172a;">' . $categoryLabel . '</td></tr>
+                            <tr><td style="padding:6px 0;color:#64748b;">Créé par :</td><td style="padding:6px 0;font-weight:600;color:#0f172a;">' . htmlspecialchars($createdByName) . '</td></tr>
+                            <tr><td style="padding:6px 0;color:#64748b;">Date :</td><td style="padding:6px 0;font-weight:600;color:#0f172a;">' . $createdAt . '</td></tr>
                         </table>
-                        ' . (!empty($description) ? '<div style="margin-top:12px;padding-top:12px;border-top:1px solid #e2e8f0;"><p style="color:#64748b;font-size:13px;margin:0 0 4px 0;">📄 Description</p><p style="color:#475569;font-size:14px;margin:0;">' . nl2br(htmlspecialchars($description)) . '</p></div>' : '') . '
+                        ' . (!empty($description) ? '<div style="margin-top:12px;padding-top:12px;border-top:1px solid #e2e8f0;"><p style="color:#64748b;font-size:13px;margin:0 0 4px 0;">Description</p><p style="color:#475569;font-size:14px;margin:0;">' . nl2br(htmlspecialchars($description)) . '</p></div>' : '') . '
                     </div>';
                 break;
                 
@@ -354,12 +354,12 @@ class EmailManager {
                     <p style="font-size:14px;color:#475569;margin:0 0 20px 0;">Le statut du ticket <strong>' . $ticketNumber . '</strong> a été modifié.</p>
                     <div style="background:#f8fafc;border-radius:12px;padding:20px;border-left:4px solid #f59e0b;margin-bottom:20px;">
                         <table style="width:100%;border-collapse:collapse;font-size:14px;">
-                            <tr><td style="padding:6px 0;color:#64748b;width:120px;">🔹 Numéro</td><td style="padding:6px 0;font-weight:600;color:#0f172a;">' . $ticketNumber . '</td></tr>
-                            <tr><td style="padding:6px 0;color:#64748b;">📝 Titre</td><td style="padding:6px 0;font-weight:600;color:#0f172a;">' . htmlspecialchars($title) . '</td></tr>
-                            <tr><td style="padding:6px 0;color:#64748b;">📊 Ancien statut</td><td style="padding:6px 0;"><span style="background:#e2e8f0;color:#475569;padding:2px 12px;border-radius:20px;font-size:13px;font-weight:600;">' . $oldStatusLabel . '</span></td></tr>
-                            <tr><td style="padding:6px 0;color:#64748b;">📊 Nouveau statut</td><td style="padding:6px 0;"><span style="background:#dbeafe;color:#1e40af;padding:2px 12px;border-radius:20px;font-size:13px;font-weight:600;">' . $newStatusLabel . '</span></td></tr>
-                            <tr><td style="padding:6px 0;color:#64748b;">📂 Catégorie</td><td style="padding:6px 0;font-weight:600;color:#0f172a;">' . $categoryLabel . '</td></tr>
-                            <tr><td style="padding:6px 0;color:#64748b;">🎯 Priorité</td><td style="padding:6px 0;"><span style="background:#fef3c7;color:#92400e;padding:2px 12px;border-radius:20px;font-size:13px;font-weight:600;">' . $priorityLabel . '</span></td></tr>
+                            <tr><td style="padding:6px 0;color:#64748b;width:120px;">Numéro :</td><td style="padding:6px 0;font-weight:600;color:#0f172a;">' . $ticketNumber . '</td></tr>
+                            <tr><td style="padding:6px 0;color:#64748b;">Titre :</td><td style="padding:6px 0;font-weight:600;color:#0f172a;">' . htmlspecialchars($title) . '</td></tr>
+                            <tr><td style="padding:6px 0;color:#64748b;">Ancien statut :</td><td style="padding:6px 0;"><span style="background:#e2e8f0;color:#475569;padding:2px 12px;border-radius:20px;font-size:13px;font-weight:600;">' . $oldStatusLabel . '</span></td></tr>
+                            <tr><td style="padding:6px 0;color:#64748b;">Nouveau statut :</td><td style="padding:6px 0;"><span style="background:#dbeafe;color:#1e40af;padding:2px 12px;border-radius:20px;font-size:13px;font-weight:600;">' . $newStatusLabel . '</span></td></tr>
+                            <tr><td style="padding:6px 0;color:#64748b;">Catégorie :</td><td style="padding:6px 0;font-weight:600;color:#0f172a;">' . $categoryLabel . '</td></tr>
+                            <tr><td style="padding:6px 0;color:#64748b;">Priorité :</td><td style="padding:6px 0;"><span style="background:#fef3c7;color:#92400e;padding:2px 12px;border-radius:20px;font-size:13px;font-weight:600;">' . $priorityLabel . '</span></td></tr>
                         </table>
                     </div>';
                 break;
@@ -434,7 +434,7 @@ class EmailManager {
         <body>
             <div class="container">
                 <div class="header">
-                    <div class="logo">Plateforme de Ticketing <span>SPIDER Ankorondrano</span></div>
+                    <div class="logo">Plateforme de Ticketing SPIDER Ankorondrano</div>
                     <div class="badge">🔔 Notification</div>
                 </div>
                 <div class="content">
@@ -447,7 +447,7 @@ class EmailManager {
                     
                     <div class="btn-container">
                         <a href="' . $ticketUrl . '" class="btn-ticket">
-                            <span class="icon">🔍</span>
+                            <span class="icon"></span>
                             Voir le ticket
                             <span class="arrow">→</span>
                         </a>
@@ -575,16 +575,16 @@ class EmailManager {
                     </div>
                     <div class="info-table">
                         <table>
-                            <tr><td class="label">🔹 Numéro</td><td class="value">' . $ticketNumber . '</td></tr>
-                            <tr><td class="label">📝 Titre</td><td class="value">' . htmlspecialchars($ticketTitle) . '</td></tr>
-                            <tr><td class="label">📊 Statut</td><td class="value"><span style="background:#dbeafe;color:#1e40af;padding:2px 12px;border-radius:20px;font-size:13px;font-weight:600;">' . $statusLabel . '</span></td></tr>
-                            <tr><td class="label">🎯 Priorité</td><td class="value"><span style="background:#fef3c7;color:#92400e;padding:2px 12px;border-radius:20px;font-size:13px;font-weight:600;">' . $priorityLabel . '</span></td></tr>
-                            <tr><td class="label">📂 Catégorie</td><td class="value">' . $categoryLabel . '</td></tr>
+                            <tr><td class="label">Numéro :</td><td class="value">' . $ticketNumber . '</td></tr>
+                            <tr><td class="label">Titre :</td><td class="value">' . htmlspecialchars($ticketTitle) . '</td></tr>
+                            <tr><td class="label">Statut :</td><td class="value"><span style="background:#dbeafe;color:#1e40af;padding:2px 12px;border-radius:20px;font-size:13px;font-weight:600;">' . $statusLabel . '</span></td></tr>
+                            <tr><td class="label">Priorité :</td><td class="value"><span style="background:#fef3c7;color:#92400e;padding:2px 12px;border-radius:20px;font-size:13px;font-weight:600;">' . $priorityLabel . '</span></td></tr>
+                            <tr><td class="label">Catégorie :</td><td class="value">' . $categoryLabel . '</td></tr>
                         </table>
                     </div>
                     ' . (!empty($content) ? '
                     <div style="background:#f1f5f9;border-radius:8px;padding:16px;margin-bottom:20px;border-left:4px solid #94a3b8;">
-                        <p style="font-size:11px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin:0 0 4px 0;">📝 Message</p>
+                        <p style="font-size:11px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin:0 0 4px 0;">Message</p>
                         <p style="margin:0;color:#1e293b;font-size:14px;">' . nl2br(htmlspecialchars($content)) . '</p>
                     </div>
                     ' : '') . '
@@ -604,8 +604,8 @@ class EmailManager {
                 <div class="footer">
                     <p style="margin:0;">© ' . date('Y') . ' Plateforme de Ticketing - SPIDER Ankorondrano</p>
                     <div class="meta">
-                        <span>📧 Cet email est automatique</span>
-                        <span>🔒 Ne pas y répondre directement</span>
+                        
+                        <span>Ne pas y répondre directement</span>
                     </div>
                 </div>
             </div>
