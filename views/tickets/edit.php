@@ -70,11 +70,11 @@ $isReadOnly = false;
             <div class="flex justify-between items-center">
                 <div>
                     <h1 class="text-xl font-bold text-gray-900">
-                        <i class="fas fa-edit text-indigo-600 mr-2"></i>
+                        <!--<i class="fas fa-edit text-indigo-600 mr-2"></i>!-->
                         Modifier le ticket <?= htmlspecialchars($ticket['ticket_number']) ?>
                     </h1>
                     <p class="text-sm text-gray-500 mt-1">
-                        <i class="fas fa-info-circle text-amber-500 mr-1"></i>
+                        <!--<i class="fas fa-info-circle text-amber-500 mr-1"></i>!-->
                         Seuls les responsables, coordinateur et l'administrateur peuvent modifier ce ticket.
                     </p>
                 </div>
