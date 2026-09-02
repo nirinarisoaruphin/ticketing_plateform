@@ -1,5 +1,5 @@
 <?php
-// api_handler.php - API complète pour la messagerie
+// api_handler.php - API complète pour la messagerie - VERSION CORRIGÉE
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
 ini_set('display_startup_errors', 0);
@@ -14,10 +14,12 @@ if (session_status() === PHP_SESSION_NONE) {
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-cache, must-revalidate');
 
-// Vérifier l'authentification
-function isApiAuthenticated() {
-    return isset($_SESSION['user_id']) && !empty($_SESSION['user_id']) && is_numeric($_SESSION['user_id']);
-}
+// ✅ CHARGER LES FONCTIONS AVANT DE LES UTILISER
+require_once __DIR__ . '/includes/functions.php';
+require_once __DIR__ . '/models/Database.php';
+
+// ✅ SUPPRIMER LA REDÉCLARATION DE isApiAuthenticated()
+// La fonction est déjà dans includes/functions.php
 
 if (!isApiAuthenticated()) {
     http_response_code(401);
@@ -30,9 +32,6 @@ if (!isApiAuthenticated()) {
 }
 
 // Charger les modèles
-require_once __DIR__ . '/models/Database.php';
-require_once __DIR__ . '/includes/functions.php';
-
 $db = Database::getInstance();
 $userId = (int)$_SESSION['user_id'];
 $action = isset($_GET['action']) ? $_GET['action'] : '';
@@ -46,31 +45,36 @@ try {
         echo json_encode(['count' => (int)$count]);
         exit;
     }
-    // ✅ COMPTER LES MESSAGES PAR TICKET
-if ($action === 'count_messages_by_ticket') {
-    $ticketId = isset($_GET['ticket_id']) ? (int)$_GET['ticket_id'] : 0;
-    if ($ticketId <= 0) {
-        echo json_encode(['count' => 0]);
+    
+    // ============================================
+    // COMPTER LES MESSAGES PAR TICKET
+    // ============================================
+    if ($action === 'count_messages_by_ticket') {
+        $ticketId = isset($_GET['ticket_id']) ? (int)$_GET['ticket_id'] : 0;
+        if ($ticketId <= 0) {
+            echo json_encode(['count' => 0]);
+            exit;
+        }
+        $count = $db->fetch("SELECT COUNT(*) as count FROM comments WHERE ticket_id = ?", [$ticketId])['count'] ?? 0;
+        echo json_encode(['count' => (int)$count]);
         exit;
     }
-    $count = $db->fetch("SELECT COUNT(*) as count FROM comments WHERE ticket_id = ?", [$ticketId])['count'] ?? 0;
-    echo json_encode(['count' => (int)$count]);
-    exit;
-}
-// ============================================
-// ✅ COMPTER LES NOTIFICATIONS NON LUES
-// ============================================
-if ($action === 'count_unread_notifications') {
-    if (!isApiAuthenticated()) {
-        echo json_encode(['count' => 0]);
+    
+    // ============================================
+    // COMPTER LES NOTIFICATIONS NON LUES
+    // ============================================
+    if ($action === 'count_unread_notifications') {
+        if (!isApiAuthenticated()) {
+            echo json_encode(['count' => 0]);
+            exit;
+        }
+        $userId = (int)$_SESSION['user_id'];
+        $notificationModel = new Notification();
+        $count = $notificationModel->getUnreadCount($userId);
+        echo json_encode(['count' => (int)$count]);
         exit;
     }
-    $userId = (int)$_SESSION['user_id'];
-    $notificationModel = new Notification();
-    $count = $notificationModel->getUnreadCount($userId);
-    echo json_encode(['count' => (int)$count]);
-    exit;
-}
+    
     // ============================================
     // RÉCUPÉRER LES MESSAGES D'UN TICKET
     // ============================================
@@ -94,18 +98,6 @@ if ($action === 'count_unread_notifications') {
         
         echo json_encode(['success' => true, 'messages' => $messages]);
         exit;
-    }
-    // Dans api_handler.php, ajouter cette action :
-
-    if ($action === 'count_messages_by_ticket') {
-    $ticketId = isset($_GET['ticket_id']) ? (int)$_GET['ticket_id'] : 0;
-    if ($ticketId <= 0) {
-        echo json_encode(['count' => 0]);
-        exit;
-    }
-    $count = $db->fetch("SELECT COUNT(*) as count FROM comments WHERE ticket_id = ?", [$ticketId])['count'] ?? 0;
-    echo json_encode(['count' => (int)$count]);
-    exit;
     }
     
     // ============================================
@@ -160,7 +152,7 @@ if ($action === 'count_unread_notifications') {
     echo json_encode([
         'success' => false,
         'error' => 'Action non reconnue',
-        'available_actions' => ['count_messages', 'get_messages', 'send_message', 'get_tickets']
+        'available_actions' => ['count_messages', 'count_messages_by_ticket', 'get_messages', 'send_message', 'get_tickets']
     ]);
     exit;
     

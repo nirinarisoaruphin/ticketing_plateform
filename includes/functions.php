@@ -1,5 +1,5 @@
 <?php
-// includes/functions.php - VERSION COMPLÈTE
+// includes/functions.php - VERSION COMPLÈTE CORRIGÉE
 // Toutes les fonctions utilitaires de la plateforme
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -19,6 +19,7 @@ function isLoggedIn() {
 
 /**
  * Vérifier si l'utilisateur est authentifié pour l'API
+ * ✅ UNIQUE DÉCLARATION - CORRIGÉ
  */
 function isApiAuthenticated() {
     if (session_status() === PHP_SESSION_NONE) {
@@ -541,19 +542,17 @@ function getUserTeam($role) {
 // ============================================
 
 /**
- * Générer un numéro de ticket
+ * Générer un numéro de ticket UNIQUE - CORRIGÉ AVEC TICKET_SEQUENCES
  */
 function generateTicketNumber($category = null) {
     $db = Database::getInstance();
     
     $prefix = 'TK-';
-    $suffix = '';
     
     switch ($category) {
         case 'support_technique':
         case 'bureau_etude':
             $prefix = 'TK-ST';
-            $suffix = '-BE';
             break;
         case 'sav':
             $prefix = 'TK-SAV';
@@ -562,24 +561,14 @@ function generateTicketNumber($category = null) {
             $prefix = 'TK-TVX';
             break;
         default:
-            $prefix = 'TK-NTC';
+            $prefix = 'TK-GEN';
             break;
     }
     
     $year = date('Y');
     
-    // ✅ COMPTEUR ATOMIQUE (remplace l'ancien COUNT(*) non fiable)
-    // L'ancien système comptait les tickets existants pour déduire le
-    // prochain numéro : sous forte concurrence (2 créations quasi
-    // simultanées), les deux requêtes lisaient le même COUNT avant
-    // qu'aucune insertion ne soit commitée => même numéro généré deux fois.
-    //
-    // Ici on utilise la table `ticket_sequences` avec l'idiome MySQL
-    // "INSERT ... ON DUPLICATE KEY UPDATE ... LAST_INSERT_ID(expr)",
-    // qui est garanti atomique au niveau du moteur InnoDB : deux
-    // connexions concurrentes ne peuvent jamais obtenir le même numéro.
-    // ⚠️ Nécessite la table créée par sql/migration_ticket_sequences.sql
     try {
+        // ✅ Utiliser la table ticket_sequences pour un compteur atomique
         $pdo = $db->getPDO();
         $stmt = $pdo->prepare(
             "INSERT INTO ticket_sequences (category_prefix, year, next_number)
@@ -589,14 +578,12 @@ function generateTicketNumber($category = null) {
         $stmt->execute([$prefix, $year]);
         $nextNumber = (int)$pdo->lastInsertId();
         
-        // Sécurité supplémentaire : ne jamais accepter 0 comme numéro
+        // Sécurité : ne jamais accepter 0
         if ($nextNumber < 1) {
             throw new Exception("Compteur invalide retourné (0), fallback nécessaire");
         }
     } catch (Exception $e) {
-        // Filet de sécurité si la table de séquence n'existe pas encore
-        // (migration non appliquée) : on retombe sur l'ancien comportement
-        // en dégradé plutôt que de planter la création de ticket.
+        // ✅ Fallback si la table n'existe pas encore
         error_log("⚠️ ticket_sequences indisponible, fallback COUNT(): " . $e->getMessage());
         $likePattern = $prefix . $year . '%';
         $count = $db->fetch(
@@ -607,8 +594,7 @@ function generateTicketNumber($category = null) {
     }
     
     $number = str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
-    
-    return $prefix . $year . '-' . $number . $suffix;
+    return $prefix . $year . '-' . $number;
 }
 
 /**
@@ -915,5 +901,37 @@ function canReceiveNotifications($role) {
         'commercial'
     ];
     return in_array($role, $allowedRoles);
+}
+
+// ============================================
+// WHATSAPP
+// ============================================
+
+/**
+ * Générer le lien WhatsApp pour un ticket
+ */
+function getWhatsAppLinkForTicket($ticket) {
+    $phoneNumber = defined('WHATSAPP_NUMBER') ? WHATSAPP_NUMBER : '261340000001';
+    $appUrl = defined('APP_URL') ? APP_URL : 'http://localhost/ticketing_plateform';
+    
+    $message = 
+        "📋 Ticket " . ($ticket['ticket_number'] ?? 'N/A') . 
+        "\n📝 Titre : " . ($ticket['title'] ?? 'Sans titre') . 
+        "\n📊 Statut : " . getStatusLabel($ticket['status'] ?? 'nouveau') . 
+        "\n🎯 Priorité : " . getPriorityLabel($ticket['priority'] ?? 'moyenne') . 
+        "\n📂 Catégorie : " . getCategoryLabel($ticket['category'] ?? 'general') .
+        "\n👤 Créé par : " . ($ticket['created_by_name'] ?? 'Inconnu') . 
+        "\n📅 Date : " . formatDate($ticket['created_at'] ?? date('Y-m-d H:i:s')) .
+        "\n\n🔗 " . $appUrl . "/index.php?page=tickets&action=show&id=" . ($ticket['id'] ?? 0);
+    
+    return "https://wa.me/" . $phoneNumber . "?text=" . urlencode($message);
+}
+
+/**
+ * Générer un lien WhatsApp avec un message personnalisé
+ */
+function getWhatsAppLinkWithMessage($message) {
+    $phoneNumber = defined('WHATSAPP_NUMBER') ? WHATSAPP_NUMBER : '261340000001';
+    return "https://wa.me/" . $phoneNumber . "?text=" . urlencode($message);
 }
 ?>

@@ -4380,6 +4380,7 @@
 2026-09-01 12:19:10 | 📧 EmailManager initialisé
 2026-09-01 12:19:22 | 📧 EmailManager initialisé
 2026-09-01 12:19:22 | 📧 EmailManager initialisé
+<<<<<<< HEAD
 2026-09-01 12:27:07 | 📧 EmailManager initialisé
 2026-09-01 12:27:37 | 📧 EmailManager initialisé
 2026-09-01 12:32:49 | 📧 EmailManager initialisé
@@ -4455,3 +4456,46 @@
 2026-09-01 13:22:10 | 📧 EmailManager initialisé
 2026-09-01 13:32:54 | 📧 EmailManager initialisé
 2026-09-01 13:34:10 | 📧 EmailManager initialisé
+=======
+2026-09-02 07:27:40 | 📧 EmailManager initialisé
+2026-09-02 08:09:07 | 📧 EmailManager initialisé
+2026-09-02 08:09:11 | 📧 EmailManager initialisé
+2026-09-02 08:09:12 | 📧 EmailManager initialisé
+2026-09-02 08:09:14 | 📧 EmailManager initialisé
+2026-09-02 08:11:29 | 📧 EmailManager initialisé
+2026-09-02 08:11:41 | 📧 EmailManager initialisé
+2026-09-02 08:11:41 | 📧 NOTIFICATION CRÉATION: Ticket TK-TVX2026-0001
+2026-09-02 08:11:41 | 📧 Total destinataires: 4
+2026-09-02 08:11:47 | To: ralijaonanirinarisoa@gmail.com | Subject: 📌 Nouveau ticket TK-TVX2026-0001 - TK-TVX20260902-20260902111131-9571 | Status: SUCCESS
+2026-09-02 08:11:47 | 📧 Email envoyé à : ralijaonanirinarisoa@gmail.com
+2026-09-02 08:11:52 | To: mirana@spider.mg | Subject: 📌 Nouveau ticket TK-TVX2026-0001 - TK-TVX20260902-20260902111131-9571 | Status: SUCCESS
+2026-09-02 08:11:52 | 📧 Email envoyé à : mirana@spider.mg
+2026-09-02 08:11:56 | To: andry@spider.mg | Subject: 📌 Nouveau ticket TK-TVX2026-0001 - TK-TVX20260902-20260902111131-9571 | Status: SUCCESS
+2026-09-02 08:11:56 | 📧 Email envoyé à : andry@spider.mg
+2026-09-02 08:12:02 | To: josoa@spider.mg | Subject: 📌 Nouveau ticket TK-TVX2026-0001 - TK-TVX20260902-20260902111131-9571 | Status: SUCCESS
+2026-09-02 08:12:02 | 📧 Email envoyé à : josoa@spider.mg
+2026-09-02 08:12:02 | 📧 4 emails envoyés sur 4
+2026-09-02 08:12:02 | 📧 EmailManager initialisé
+2026-09-02 08:12:08 | 📧 EmailManager initialisé
+2026-09-02 08:12:35 | 📧 EmailManager initialisé
+2026-09-02 08:12:37 | 📧 EmailManager initialisé
+2026-09-02 08:12:51 | 📧 EmailManager initialisé
+2026-09-02 08:13:13 | 📧 EmailManager initialisé
+2026-09-02 08:13:13 | 📧 NOTIFICATION CRÉATION: Ticket TK-TVX2026-0002
+2026-09-02 08:13:13 | 📧 Total destinataires: 4
+2026-09-02 08:13:18 | To: ralijaonanirinarisoa@gmail.com | Subject: 📌 Nouveau ticket TK-TVX2026-0002 - TK-TVX20260902-20260902111253-3277 | Status: SUCCESS
+2026-09-02 08:13:18 | 📧 Email envoyé à : ralijaonanirinarisoa@gmail.com
+2026-09-02 08:13:22 | To: mirana@spider.mg | Subject: 📌 Nouveau ticket TK-TVX2026-0002 - TK-TVX20260902-20260902111253-3277 | Status: SUCCESS
+2026-09-02 08:13:22 | 📧 Email envoyé à : mirana@spider.mg
+2026-09-02 08:13:27 | To: andry@spider.mg | Subject: 📌 Nouveau ticket TK-TVX2026-0002 - TK-TVX20260902-20260902111253-3277 | Status: SUCCESS
+2026-09-02 08:13:27 | 📧 Email envoyé à : andry@spider.mg
+2026-09-02 08:13:32 | To: hery@spider.mg | Subject: 📌 Nouveau ticket TK-TVX2026-0002 - TK-TVX20260902-20260902111253-3277 | Status: SUCCESS
+2026-09-02 08:13:32 | 📧 Email envoyé à : hery@spider.mg
+2026-09-02 08:13:32 | 📧 4 emails envoyés sur 4
+2026-09-02 08:13:32 | 📧 EmailManager initialisé
+2026-09-02 08:14:57 | 📧 EmailManager initialisé
+2026-09-02 08:15:15 | 📧 EmailManager initialisé
+2026-09-02 08:15:47 | 📧 EmailManager initialisé
+2026-09-02 08:15:58 | 📧 EmailManager initialisé
+2026-09-02 08:16:12 | 📧 EmailManager initialisé
+>>>>>>> 80f7ef0 (Suppression des icônes)
