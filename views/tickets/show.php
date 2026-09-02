@@ -12,7 +12,7 @@ $assignedUsers = $assignedUsers ?? [];
 
 // ✅ GÉNÉRER LE LIEN WHATSAPP
 function getWhatsAppLink($ticket) {
-    $phoneNumber = '261340000001'; // ⚠️ REMPLACER PAR VOTRE NUMÉRO (format international sans le +)
+    $phoneNumber = '261340000001';
     
     $message = 
         "📋 Ticket " . ($ticket['ticket_number'] ?? 'N/A') . 
@@ -214,30 +214,47 @@ $whatsappLink = isset($ticket) ? getWhatsAppLink($ticket) : '#';
                 </div>
                 
                 <!-- ============================================ -->
-                <!-- ✅ BOUTON WHATSAPP -->
+                <!-- ✅ BOUTONS WHATSAPP AVEC IMAGE (NOUVEAU) -->
                 <!-- ============================================ -->
                 <div class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200 flex flex-wrap items-center justify-between gap-3">
                     <div>
                         <p class="text-sm font-medium text-green-800">
                             <i class="fab fa-whatsapp text-xl text-green-600 mr-2"></i>
-                            Partager ce ticket
+                            Partager sur WhatsApp avec image récapitulative
                         </p>
                         <p class="text-xs text-green-600">
-                            Envoyez les informations du ticket via WhatsApp
+                            Génère une image récapitulative et la partage sur WhatsApp
                         </p>
                     </div>
                     <div class="flex flex-wrap gap-2">
-                        <a href="<?= $whatsappLink ?>" target="_blank" 
-                           class="bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg transition shadow-md hover:shadow-lg flex items-center gap-2 font-medium">
-                            <i class="fab fa-whatsapp text-xl"></i>
-                            Partager sur WhatsApp
-                        </a>
-                        <!-- Bouton copier le lien (optionnel) -->
-                        <button onclick="copyToClipboard('<?= APP_URL ?>/index.php?page=tickets&action=show&id=<?= $ticket['id'] ?>')" 
-                                class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2.5 rounded-lg transition flex items-center gap-2 font-medium">
-                            <i class="fas fa-copy"></i>
-                            Copier le lien
+                        <?php if ($canAct && $ticket['status'] !== 'cloture' && $role !== 'commercial'): ?>
+                        <button onclick="shareOnWhatsApp('resolu')" 
+                                class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg transition shadow-md hover:shadow-lg flex items-center gap-2 font-medium text-sm">
+                            <i class="fab fa-whatsapp text-lg"></i>
+                            Résolu
                         </button>
+                        <button onclick="shareOnWhatsApp('en_cours')" 
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition shadow-md hover:shadow-lg flex items-center gap-2 font-medium text-sm">
+                            <i class="fab fa-whatsapp text-lg"></i>
+                            En cours
+                        </button>
+                        <button onclick="shareOnWhatsApp('en_attente')" 
+                                class="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-2 rounded-lg transition shadow-md hover:shadow-lg flex items-center gap-2 font-medium text-sm">
+                            <i class="fab fa-whatsapp text-lg"></i>
+                            En attente
+                        </button>
+                        <button onclick="shareOnWhatsApp('signaler_probleme')" 
+                                class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg transition shadow-md hover:shadow-lg flex items-center gap-2 font-medium text-sm">
+                            <i class="fab fa-whatsapp text-lg"></i>
+                            Signaler
+                        </button>
+                        <?php else: ?>
+                        <button onclick="shareOnWhatsApp('general')" 
+                                class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg transition shadow-md hover:shadow-lg flex items-center gap-2 font-medium text-sm">
+                            <i class="fab fa-whatsapp text-lg"></i>
+                            Partager
+                        </button>
+                        <?php endif; ?>
                     </div>
                 </div>
                 
@@ -362,98 +379,25 @@ $whatsappLink = isset($ticket) ? getWhatsAppLink($ticket) : '#';
     </div>
 </div>
 
-<style>
-.page-enter {
-    animation: pageEnter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-@keyframes pageEnter {
-    from { opacity: 0; transform: translateY(20px) scale(0.98); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-}
-.flash-message {
-    padding: 0.75rem 1rem;
-    border-radius: 0.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    animation: slideDown 0.4s ease-out;
-}
-.flash-success { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; }
-.flash-danger { background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; }
-.flash-warning { background: #fffbeb; border: 1px solid #fcd34d; color: #92400e; }
-@keyframes slideDown {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-.btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 0.5rem;
-    font-weight: 600;
-    font-size: 0.8rem;
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    cursor: pointer;
-    text-decoration: none;
-}
-.btn-sm {
-    padding: 0.375rem 0.75rem;
-    font-size: 0.75rem;
-}
-.btn-primary {
-    background: #2563EB;
-    color: white;
-}
-.btn-primary:hover {
-    background: #1D4ED8;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-}
-.btn-danger {
-    background: #EF4444;
-    color: white;
-}
-.btn-danger:hover {
-    background: #DC2626;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-}
-.btn-outline {
-    background: transparent;
-    color: #6B7280;
-    border: 1.5px solid #E5E7EB;
-}
-.btn-outline:hover {
-    background: #F9FAFB;
-    border-color: #D1D5DB;
-    transform: translateY(-2px);
-}
-.badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    padding: 0.25rem 0.6rem;
-    border-radius: 9999px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    line-height: 1.5;
-}
-.badge-status-nouveau { background: #DBEAFE; color: #1E40AF; }
-.badge-status-assigne { background: #EDE9FE; color: #5B21B6; }
-.badge-status-en_cours { background: #FEF3C7; color: #92400E; }
-.badge-status-en_attente { background: #FED7AA; color: #9A3412; }
-.badge-status-resolu { background: #D1FAE5; color: #065F46; }
-.badge-status-cloture { background: #F3F4F6; color: #374151; }
-.badge-priority-basse { background: #F3F4F6; color: #374151; }
-.badge-priority-moyenne { background: #DBEAFE; color: #1E40AF; }
-.badge-priority-haute { background: #FEF3C7; color: #92400E; }
-.badge-priority-critique { background: #FEE2E2; color: #991B1B; }
-</style>
-
+<!-- ============================================ -->
+<!-- SCRIPTS WHATSAPP -->
+<!-- ============================================ -->
 <script>
+// ============================================
+// PARTAGER SUR WHATSAPP AVEC IMAGE
+// ============================================
+
+function shareOnWhatsApp(actionType) {
+    const ticketId = <?= $ticket['id'] ?? 0 ?>;
+    const url = 'index.php?page=whatsapp_share&id=' + ticketId + '&action=' + actionType;
+    
+    // Afficher un message de chargement
+    showToast('📱 Génération de l\'image WhatsApp...', 'info');
+    
+    // Ouvrir dans un nouvel onglet
+    window.open(url, '_blank');
+}
+
 function confirmDeleteTicket(ticketNumber) {
     return confirm(
         '⚠️ Êtes-vous sûr de vouloir supprimer le ticket ' + ticketNumber + ' ?\n\n' +
@@ -544,5 +488,96 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 </script>
+
+<style>
+.page-enter {
+    animation: pageEnter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes pageEnter {
+    from { opacity: 0; transform: translateY(20px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.flash-message {
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    animation: slideDown 0.4s ease-out;
+}
+.flash-success { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; }
+.flash-danger { background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; }
+.flash-warning { background: #fffbeb; border: 1px solid #fcd34d; color: #92400e; }
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.8rem;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    cursor: pointer;
+    text-decoration: none;
+}
+.btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+}
+.btn-primary {
+    background: #2563EB;
+    color: white;
+}
+.btn-primary:hover {
+    background: #1D4ED8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+.btn-danger {
+    background: #EF4444;
+    color: white;
+}
+.btn-danger:hover {
+    background: #DC2626;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+.btn-outline {
+    background: transparent;
+    color: #6B7280;
+    border: 1.5px solid #E5E7EB;
+}
+.btn-outline:hover {
+    background: #F9FAFB;
+    border-color: #D1D5DB;
+    transform: translateY(-2px);
+}
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    line-height: 1.5;
+}
+.badge-status-nouveau { background: #DBEAFE; color: #1E40AF; }
+.badge-status-assigne { background: #EDE9FE; color: #5B21B6; }
+.badge-status-en_cours { background: #FEF3C7; color: #92400E; }
+.badge-status-en_attente { background: #FED7AA; color: #9A3412; }
+.badge-status-resolu { background: #D1FAE5; color: #065F46; }
+.badge-status-cloture { background: #F3F4F6; color: #374151; }
+.badge-priority-basse { background: #F3F4F6; color: #374151; }
+.badge-priority-moyenne { background: #DBEAFE; color: #1E40AF; }
+.badge-priority-haute { background: #FEF3C7; color: #92400E; }
+.badge-priority-critique { background: #FEE2E2; color: #991B1B; }
+</style>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>

@@ -1,5 +1,5 @@
 <?php
-// controllers/TicketController.php - VERSION DÉFINITIVE CORRIGÉE
+// controllers/TicketController.php - VERSION COMPLÈTE AVEC WHATSAPP IMAGE
 
 require_once __DIR__ . '/../models/Ticket.php';
 require_once __DIR__ . '/../models/User.php';
@@ -8,6 +8,8 @@ require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/NotificationManager.php';
 require_once __DIR__ . '/../includes/Mailer.php';
 require_once __DIR__ . '/../includes/EmailManager.php';
+require_once __DIR__ . '/../includes/WhatsAppImageGenerator.php';
+require_once __DIR__ . '/../config/app.php';
 
 class TicketController {
     private $ticketModel;
@@ -65,7 +67,7 @@ class TicketController {
     }
     
     // ============================================
-    // AFFICHER UN TICKET - CORRIGÉ DÉFINITIVEMENT
+    // AFFICHER UN TICKET
     // ============================================
     
     public function show() {
@@ -79,7 +81,6 @@ class TicketController {
             redirect('index.php?page=tickets');
         }
         
-        // ✅ RÉCUPÉRER LE TICKET DIRECTEMENT SANS RESTRICTION
         $db = Database::getInstance();
         $ticket = $db->fetch("SELECT * FROM tickets WHERE id = ?", [$id]);
         
@@ -91,7 +92,6 @@ class TicketController {
         $role = $_SESSION['user_role'] ?? 'commercial';
         $userId = $_SESSION['user_id'] ?? 0;
         
-        // ✅ VÉRIFICATION SIMPLIFIÉE ET ROBUSTE
         $canView = false;
         
         if ($role === 'admin' || $role === 'coordinateur') {
@@ -111,12 +111,10 @@ class TicketController {
         }
         
         if (!$canView) {
-            error_log("❌ Accès refusé - ID: " . $id . ", Rôle: " . $role . ", Catégorie: " . ($ticket['category'] ?? 'N/A') . ", assigned_to: " . ($ticket['assigned_to'] ?? 'NULL'));
             setFlash('danger', 'Vous n\'avez pas accès à ce ticket.');
             redirect('index.php?page=tickets');
         }
         
-        // ✅ RÉCUPÉRER LES NOMS
         $creator = $db->fetch("SELECT full_name FROM users WHERE id = ?", [$ticket['created_by']]);
         $ticket['created_by_name'] = $creator ? $creator['full_name'] : 'Inconnu';
         
@@ -150,7 +148,7 @@ class TicketController {
     }
     
     // ============================================
-    // CRÉER UN TICKET - CORRIGÉ DÉFINITIVEMENT
+    // CRÉER UN TICKET
     // ============================================
     
     public function create() {
@@ -158,21 +156,13 @@ class TicketController {
         $pageTitle = 'Nouveau ticket';
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // ✅ ANTI DOUBLE-SOUMISSION — JETON À USAGE UNIQUE
-            // Protection définitive, indépendante de tout bug JS ou de
-            // course SQL : chaque affichage du formulaire génère un jeton
-            // stocké en session. Au premier POST valide, on le supprime
-            // immédiatement de la session. Toute 2e soumission (double-clic,
-            // double appui Entrée, requête rejouée, ancien JS non à jour...)
-            // arrivera avec soit ce même jeton déjà consommé, soit un jeton
-            // absent → elle est bloquée avant toute insertion en base.
             $submittedToken = $_POST['submission_token'] ?? '';
             $validToken = isset($_SESSION['ticket_submission_token'])
                 && $submittedToken !== ''
                 && hash_equals($_SESSION['ticket_submission_token'], $submittedToken);
             
             if (!$validToken) {
-                error_log("⛔ Soumission de ticket bloquée : jeton invalide ou déjà utilisé (double-soumission)");
+                error_log("⛔ Soumission de ticket bloquée : jeton invalide ou déjà utilisé");
                 if ($this->isAjax()) {
                     $this->jsonResponse([
                         'success' => false,
@@ -181,11 +171,9 @@ class TicketController {
                         'redirect' => 'index.php?page=tickets'
                     ]);
                 }
-                setFlash('warning', 'Ce ticket a déjà été soumis. Si vous ne le voyez pas encore dans la liste, patientez quelques secondes.');
+                setFlash('warning', 'Ce ticket a déjà été soumis.');
                 redirect('index.php?page=tickets');
             }
-            // Jeton consommé immédiatement : impossible de le réutiliser,
-            // même si le navigateur renvoie deux fois le même formulaire.
             unset($_SESSION['ticket_submission_token']);
             
             $category = isset($_POST['category']) ? $_POST['category'] : 'support_technique';
@@ -193,44 +181,33 @@ class TicketController {
             
             $db = Database::getInstance();
             
-            // ✅ MAPPING CATÉGORIE → RÔLE DU RESPONSABLE (PAS D'ID EN DUR)
-            // Les ID utilisateurs peuvent changer (suppression, réinstallation, etc.),
-            // on retrouve donc le responsable par son RÔLE, pas par un ID fixe.
             $categoryResponsibleRoleMap = [
-                'support_technique' => 'responsable_support_technique', // Mahery
-                'bureau_etude'      => 'responsable_support_technique', // Mahery
-                'sav'               => 'responsable_sav',               // Dina
-                'travaux'           => 'responsable_travaux'            // Andry
+                'support_technique' => 'responsable_support_technique',
+                'bureau_etude'      => 'responsable_support_technique',
+                'sav'               => 'responsable_sav',
+                'travaux'           => 'responsable_travaux'
             ];
             
             $assignedTo = null;
             $responsibleRole = $categoryResponsibleRoleMap[$category] ?? null;
             
             if ($responsibleRole) {
-                // ✅ RÉCUPÉRER L'UTILISATEUR ACTIF AYANT CE RÔLE
                 $responsible = $db->fetch(
                     "SELECT id FROM users WHERE role = ? AND active = 1 ORDER BY id ASC LIMIT 1",
                     [$responsibleRole]
                 );
                 if ($responsible) {
                     $assignedTo = $responsible['id'];
-                    error_log("✅ Responsable assigné (ID: " . $assignedTo . ", rôle: $responsibleRole) pour la catégorie: " . $category);
-                } else {
-                    error_log("⚠️ Aucun utilisateur actif trouvé pour le rôle '$responsibleRole'");
                 }
             }
             
-            // ✅ SI AUCUN RESPONSABLE TROUVÉ, ASSIGNER L'ADMIN
             if ($assignedTo === null) {
                 $admin = $db->fetch("SELECT id FROM users WHERE role = 'admin' AND active = 1 LIMIT 1");
                 $assignedTo = $admin ? $admin['id'] : 1;
-                error_log("⚠️ Aucun responsable trouvé, assignation à l'admin (ID: " . $assignedTo . ")");
             }
             
-            // ✅ GÉNÉRER LE NUMÉRO DE TICKET
             $ticketNumber = generateTicketNumber($category);
             
-            // ✅ VÉRIFIER SI LE NUMÉRO DE TICKET EXISTE DÉJÀ
             $existingTicket = $db->fetch(
                 "SELECT id FROM tickets WHERE ticket_number = ?",
                 [$ticketNumber]
@@ -250,41 +227,8 @@ class TicketController {
             $userName = $_SESSION['user_name'] ?? 'Utilisateur';
             $userRole = $_SESSION['user_role'] ?? 'commercial';
             
-            // ✅ ANTI DOUBLE-SOUMISSION (garde-fou serveur)
-            // Bloque une 2e création si un ticket quasi identique vient d'être
-            // créé par le même utilisateur il y a moins de 10 secondes
-            // (double-clic, double appui Entrée, requêtes concurrentes...).
-            $recentDuplicate = $db->fetch(
-                "SELECT id FROM tickets 
-                 WHERE created_by = ? 
-                   AND category = ? 
-                   AND description = ? 
-                   AND created_at >= (NOW() - INTERVAL 10 SECOND)
-                 LIMIT 1",
-                [
-                    $_SESSION['user_id'],
-                    $category,
-                    sanitize($_POST['description'] ?? '')
-                ]
-            );
-            
-            if ($recentDuplicate) {
-                error_log("⛔ Double-soumission détectée et bloquée (ticket existant ID: " . $recentDuplicate['id'] . ")");
-                if ($this->isAjax()) {
-                    $this->jsonResponse([
-                        'success' => true,
-                        'duplicate' => true,
-                        'message' => 'Ticket déjà créé.',
-                        'redirect' => 'index.php?page=tickets&action=show&id=' . $recentDuplicate['id']
-                    ]);
-                }
-                redirect('index.php?page=tickets&action=show&id=' . $recentDuplicate['id']);
-            }
-            
-            // ✅ Validation des champs requis
             $errors = [];
             
-            // ✅ TITRE - Généré automatiquement
             if (empty($_POST['title'])) {
                 $_POST['title'] = generateUniqueTitle($category);
             }
@@ -299,7 +243,6 @@ class TicketController {
                 $errors['visite_heure'] = 'L\'heure de visite est requise.';
             }
             
-            // ✅ CLIENT NAME ET ADRESSE - requis sauf pour responsable
             if (!in_array($userRole, ['responsable_support_technique', 'responsable_sav', 'responsable_travaux'])) {
                 if (empty($_POST['client_name'])) {
                     $errors['client_name'] = 'Le nom du client est requis.';
@@ -322,7 +265,6 @@ class TicketController {
                 redirect('index.php?page=tickets&action=create');
             }
             
-            // ✅ RÉCUPÉRER LE COMMERCIAL DÉDIÉ / RESPONSABLE
             $commercialDedie = sanitize($_POST['commercial_dedie'] ?? $userName);
             $role = $userRole;
             
@@ -332,7 +274,6 @@ class TicketController {
                 $commercialDedie = 'Administrateur - ' . $commercialDedie;
             }
             
-            // ✅ TITRE
             $title = !empty($_POST['title']) ? sanitize($_POST['title']) : generateUniqueTitle($category);
             
             $data = array(
@@ -345,7 +286,7 @@ class TicketController {
                 'status' => 'nouveau',
                 'validation_status' => 'en_attente',
                 'created_by' => $_SESSION['user_id'],
-                'assigned_to' => $assignedTo,  // ✅ FORCER LA VALEUR
+                'assigned_to' => $assignedTo,
                 'commercial_dedie' => $commercialDedie,
                 'client_name' => isset($_POST['client_name']) ? sanitize($_POST['client_name']) : null,
                 'adresse_client' => isset($_POST['adresse_client']) ? sanitize($_POST['adresse_client']) : null,
@@ -358,7 +299,6 @@ class TicketController {
                 'elements_complement' => sanitize($_POST['elements_complement'] ?? '')
             );
             
-            // Traiter la pièce jointe
             if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] === UPLOAD_ERR_OK) {
                 $uploadDir = __DIR__ . '/../uploads/';
                 if (!is_dir($uploadDir)) {
@@ -371,27 +311,12 @@ class TicketController {
                 }
             }
             
-            // ✅ CRÉER LE TICKET
             $ticketId = $this->ticketModel->create($data);
             
             if ($ticketId) {
-                // ✅ VÉRIFIER QUE LE TICKET A BIEN ÉTÉ CRÉÉ
                 $ticket = $db->fetch("SELECT * FROM tickets WHERE id = ?", [$ticketId]);
                 
-                if ($ticket) {
-                    error_log("✅ TICKET CRÉÉ - ID: " . $ticket['id'] . ", assigned_to: " . ($ticket['assigned_to'] ?? 'NULL') . ", category: " . $ticket['category']);
-                    
-                    // ✅ RÉCUPÉRER LE NOM DU CRÉATEUR
-                    $creator = $db->fetch("SELECT full_name FROM users WHERE id = ?", [$ticket['created_by']]);
-                    $ticket['created_by_name'] = $creator ? $creator['full_name'] : 'Inconnu';
-                    
-                    // ✅ RÉCUPÉRER LE NOM DU RESPONSABLE ASSIGNÉ
-                    if ($ticket['assigned_to']) {
-                        $assigned = $db->fetch("SELECT full_name FROM users WHERE id = ?", [$ticket['assigned_to']]);
-                        $ticket['assigned_to_name'] = $assigned ? $assigned['full_name'] : null;
-                    }
-                } else {
-                    // ✅ SI LE TICKET N'EST PAS TROUVÉ, UTILISER LES DONNÉES DISPONIBLES
+                if (!$ticket) {
                     $ticket = array(
                         'id' => $ticketId,
                         'ticket_number' => $ticketNumber,
@@ -406,16 +331,11 @@ class TicketController {
                         'created_by_name' => $userName,
                         'created_at' => date('Y-m-d H:i:s')
                     );
-                    error_log("⚠️ Ticket créé mais non récupéré - ID: " . $ticketId);
                 }
                 
                 $link = "index.php?page=tickets&action=show&id=" . $ticketId;
                 
-                // ============================================
-                // ✅ NOTIFICATIONS IN-APP
-                // ============================================
-                
-                // 1. Notifier le créateur
+                // NOTIFICATIONS IN-APP
                 $this->notificationModel->createNotification(
                     $ticket['created_by'],
                     "✅ Votre ticket {$ticket['ticket_number']} a été créé avec succès",
@@ -423,7 +343,6 @@ class TicketController {
                     'ticket'
                 );
                 
-                // 2. Notifier le responsable assigné
                 if ($assignedTo && $assignedTo != $_SESSION['user_id']) {
                     $this->notificationModel->createNotification(
                         $assignedTo,
@@ -433,60 +352,42 @@ class TicketController {
                     );
                 }
                 
-                // 3. Notifier TOUS les responsables
-                $allResponsables = $db->fetchAll(
-                    "SELECT id FROM users WHERE role IN ('responsable_support_technique', 'responsable_sav', 'responsable_travaux') AND id != ?",
-                    [$_SESSION['user_id']]
-                );
-                foreach ($allResponsables as $resp) {
-                    $this->notificationModel->createNotification(
-                        $resp['id'],
-                        "📌 Nouveau ticket {$ticket['ticket_number']} créé par " . $userName . " (" . getRoleLabel($userRole) . ")",
-                        $link,
-                        'ticket'
-                    );
-                }
-                
-                // 4. Notifier les chargés d'étude
-                if (in_array($category, ['support_technique', 'bureau_etude'])) {
-                    $charges = $db->fetchAll(
-                        "SELECT id FROM users WHERE role IN ('charge_etude_electricite', 'charge_etude_courant_faible', 'charge_etude_climatisation')"
-                    );
-                    foreach ($charges as $charge) {
-                        $this->notificationModel->createNotification(
-                            $charge['id'],
-                            "📌 Nouveau ticket {$ticket['ticket_number']} en attente d'étude : {$ticket['title']}",
-                            $link,
-                            'ticket'
-                        );
+                // ENVOI WHATSAPP
+                try {
+                    $commercial = $db->fetch("SELECT id, full_name, email, phone FROM users WHERE id = ?", [$ticket['created_by']]);
+                    
+                    if ($commercial && !empty($commercial['phone'])) {
+                        $phone = cleanPhoneNumber($commercial['phone']);
+                        if ($phone) {
+                            $ticketNumber = $ticket['ticket_number'] ?? 'N/A';
+                            $ticketTitle = $ticket['title'] ?? 'Sans titre';
+                            $ticketUrl = APP_URL . "/index.php?page=tickets&action=show&id=" . $ticketId;
+                            
+                            $whatsappMessage = "📋 *Nouveau ticket créé - #{$ticketNumber}*\n\n";
+                            $whatsappMessage .= "👤 *Créé par :* " . $userName . "\n";
+                            $whatsappMessage .= "📝 *Titre :* " . htmlspecialchars($ticketTitle) . "\n";
+                            $whatsappMessage .= "📊 *Statut :* Nouveau\n";
+                            $whatsappMessage .= "🎯 *Priorité :* " . getPriorityLabel($ticket['priority'] ?? 'moyenne') . "\n";
+                            $whatsappMessage .= "📂 *Catégorie :* " . getCategoryLabel($ticket['category'] ?? 'general') . "\n";
+                            $whatsappMessage .= "📅 *Date :* " . date('d/m/Y à H:i') . "\n\n";
+                            $whatsappMessage .= "🔗 *Lien :* " . $ticketUrl . "\n\n";
+                            $whatsappMessage .= "---\n";
+                            $whatsappMessage .= "Plateforme de Ticketing - SPIDER Madagascar";
+                            
+                            $db->insert(
+                                "INSERT INTO whatsapp_queue (ticket_id, user_id, phone, message, status, created_at) 
+                                 VALUES (?, ?, ?, ?, 'pending', NOW())",
+                                [$ticketId, $commercial['id'], $phone, $whatsappMessage]
+                            );
+                            
+                            error_log("📱 WhatsApp nouvelle création en file d'attente pour " . $commercial['full_name']);
+                        }
                     }
+                } catch (Exception $e) {
+                    error_log("❌ Erreur envoi WhatsApp création: " . $e->getMessage());
                 }
                 
-                // 5. Notifier le Coordinateur
-                $coordinateurs = $db->fetchAll("SELECT id FROM users WHERE role = 'coordinateur'");
-                foreach ($coordinateurs as $coord) {
-                    $this->notificationModel->createNotification(
-                        $coord['id'],
-                        "📌 Nouveau ticket {$ticket['ticket_number']} créé par " . $userName,
-                        $link,
-                        'ticket'
-                    );
-                }
-                
-                // 6. Notifier l'Admin
-                $admins = $db->fetchAll("SELECT id FROM users WHERE role = 'admin' AND id != ?", [$_SESSION['user_id']]);
-                foreach ($admins as $admin) {
-                    $this->notificationModel->createNotification(
-                        $admin['id'],
-                        "📌 Nouveau ticket {$ticket['ticket_number']} créé par " . $userName,
-                        $link,
-                        'ticket'
-                    );
-                }
-                
-                // ============================================
-                // ✅ ENVOI D'EMAILS
-                // ============================================
+                // ENVOI D'EMAILS
                 try {
                     if (isset($ticket['id']) && $ticket['id'] > 0) {
                         $this->emailManager->notifyTicketCreated($ticket);
@@ -518,7 +419,6 @@ class TicketController {
             }
         }
         
-        // ✅ Générer un nouveau jeton anti double-soumission pour ce formulaire
         $submissionToken = bin2hex(random_bytes(32));
         $_SESSION['ticket_submission_token'] = $submissionToken;
         
@@ -562,11 +462,6 @@ class TicketController {
         
         if ($ticket['status'] === 'cloture' && $role !== 'admin') {
             setFlash('danger', 'Ce ticket est clôturé et ne peut plus être modifié.');
-            redirect('index.php?page=tickets&action=show&id=' . $id);
-        }
-        
-        if ($ticket['status'] === 'resolu' && !in_array($role, ['admin', 'coordinateur'])) {
-            setFlash('danger', 'Ce ticket est résolu et ne peut plus être modifié.');
             redirect('index.php?page=tickets&action=show&id=' . $id);
         }
         
@@ -635,6 +530,42 @@ class TicketController {
                         $link,
                         'status'
                     );
+                }
+                
+                // ENVOI WHATSAPP STATUT
+                try {
+                    $commercial = $this->db->fetch("SELECT id, full_name, email, phone FROM users WHERE id = ?", [$updatedTicket['created_by']]);
+                    
+                    if ($commercial && !empty($commercial['phone'])) {
+                        $phone = cleanPhoneNumber($commercial['phone']);
+                        if ($phone) {
+                            $ticketNumber = $updatedTicket['ticket_number'] ?? 'N/A';
+                            $ticketTitle = $updatedTicket['title'] ?? 'Sans titre';
+                            $ticketUrl = APP_URL . "/index.php?page=tickets&action=show&id=" . $id;
+                            $oldStatusLabel = getStatusLabel($oldStatus);
+                            $newStatusLabel = getStatusLabel($updatedTicket['status']);
+                            
+                            $whatsappMessage = "📊 *Changement de statut - Ticket #{$ticketNumber}*\n\n";
+                            $whatsappMessage .= "👤 *Par :* " . $_SESSION['user_name'] . "\n";
+                            $whatsappMessage .= "📝 *Titre :* " . htmlspecialchars($ticketTitle) . "\n";
+                            $whatsappMessage .= "📊 *Ancien statut :* " . $oldStatusLabel . "\n";
+                            $whatsappMessage .= "📊 *Nouveau statut :* " . $newStatusLabel . "\n";
+                            $whatsappMessage .= "📅 *Date :* " . date('d/m/Y à H:i') . "\n\n";
+                            $whatsappMessage .= "🔗 *Lien :* " . $ticketUrl . "\n\n";
+                            $whatsappMessage .= "---\n";
+                            $whatsappMessage .= "Plateforme de Ticketing - SPIDER Madagascar";
+                            
+                            $this->db->insert(
+                                "INSERT INTO whatsapp_queue (ticket_id, user_id, phone, message, status, created_at) 
+                                 VALUES (?, ?, ?, ?, 'pending', NOW())",
+                                [$id, $commercial['id'], $phone, $whatsappMessage]
+                            );
+                            
+                            error_log("📱 WhatsApp statut en file d'attente pour " . $commercial['full_name']);
+                        }
+                    }
+                } catch (Exception $e) {
+                    error_log("❌ Erreur envoi WhatsApp statut: " . $e->getMessage());
                 }
                 
                 try {
@@ -790,6 +721,41 @@ class TicketController {
                 $this->notificationModel->createNotification($ticket['assigned_to'], $commentMessage, $link, 'comment');
             }
             
+            // ENVOI WHATSAPP COMMENTAIRE
+            try {
+                $commercial = $db->fetch("SELECT id, full_name, email, phone FROM users WHERE id = ?", [$ticket['created_by']]);
+                
+                if ($commercial && !empty($commercial['phone'])) {
+                    $phone = cleanPhoneNumber($commercial['phone']);
+                    if ($phone) {
+                        $ticketNumber = $ticket['ticket_number'] ?? 'N/A';
+                        $ticketTitle = $ticket['title'] ?? 'Sans titre';
+                        $ticketUrl = APP_URL . "/index.php?page=tickets&action=show&id=" . $ticketId;
+                        $shortContent = strlen($content) > 100 ? substr($content, 0, 100) . '...' : $content;
+                        
+                        $whatsappMessage = "💬 *Nouveau commentaire - Ticket #{$ticketNumber}*\n\n";
+                        $whatsappMessage .= "👤 *Par :* " . $_SESSION['user_name'] . "\n";
+                        $whatsappMessage .= "📝 *Titre :* " . htmlspecialchars($ticketTitle) . "\n";
+                        $whatsappMessage .= "📊 *Statut :* " . getStatusLabel($ticket['status']) . "\n";
+                        $whatsappMessage .= "📅 *Date :* " . date('d/m/Y à H:i') . "\n\n";
+                        $whatsappMessage .= "📝 *Message :*\n" . htmlspecialchars($shortContent) . "\n\n";
+                        $whatsappMessage .= "🔗 *Lien :* " . $ticketUrl . "\n\n";
+                        $whatsappMessage .= "---\n";
+                        $whatsappMessage .= "Plateforme de Ticketing - SPIDER Madagascar";
+                        
+                        $db->insert(
+                            "INSERT INTO whatsapp_queue (ticket_id, user_id, phone, message, status, created_at) 
+                             VALUES (?, ?, ?, ?, 'pending', NOW())",
+                            [$ticketId, $commercial['id'], $phone, $whatsappMessage]
+                        );
+                        
+                        error_log("📱 WhatsApp commentaire en file d'attente pour " . $commercial['full_name']);
+                    }
+                }
+            } catch (Exception $e) {
+                error_log("❌ Erreur envoi WhatsApp commentaire: " . $e->getMessage());
+            }
+            
             try {
                 $this->notificationManager->notifyCommentAdded($ticket, $content, $_SESSION['user_name'] ?? 'Utilisateur');
             } catch (Exception $e) {
@@ -810,7 +776,7 @@ class TicketController {
     }
     
     // ============================================
-    // AJOUTER UNE ACTION
+    // AJOUTER UNE ACTION - AVEC WHATSAPP IMAGE
     // ============================================
     
     public function addAction() {
@@ -908,6 +874,70 @@ class TicketController {
                     }
                 }
                 
+                // ============================================
+                // ✅ GÉNÉRATION D'IMAGE WHATSAPP (NOUVEAU)
+                // ============================================
+                try {
+                    $db = Database::getInstance();
+                    $imageGenerator = new WhatsAppImageGenerator();
+                    $senderName = $_SESSION['user_name'] ?? 'Responsable';
+                    
+                    // Générer l'image récapitulative
+                    $imageData = $imageGenerator->generateActionImage(
+                        $ticket, 
+                        $actionType, 
+                        $senderName, 
+                        $content
+                    );
+                    
+                    // Sauvegarder le lien de l'image dans la base
+                    $db->insert(
+                        "INSERT INTO whatsapp_images (ticket_id, action_type, image_path, image_url, created_at) 
+                         VALUES (?, ?, ?, ?, NOW())",
+                        [$ticketId, $actionType, $imageData['path'], $imageData['url']]
+                    );
+                    
+                    // Envoyer le lien WhatsApp au commercial
+                    $commercial = $db->fetch("SELECT id, full_name, phone FROM users WHERE id = ?", [$ticket['created_by']]);
+                    
+                    if ($commercial && !empty($commercial['phone'])) {
+                        $phone = cleanPhoneNumber($commercial['phone']);
+                        if ($phone) {
+                            $actionLabels = [
+                                'resolu' => '✅ Ticket résolu',
+                                'en_cours' => '🔄 Ticket en cours',
+                                'en_attente' => '⏳ Ticket en attente',
+                                'signaler_probleme' => '⚠️ Problème signalé',
+                                'commentaire' => '💬 Nouveau commentaire',
+                                'notifier_client' => '📢 Client notifié',
+                                'demander_info' => '❓ Demande d\'information',
+                                'escalader' => '⬆️ Ticket escaladé'
+                            ];
+                            $actionLabel = $actionLabels[$actionType] ?? 'Action effectuée';
+                            $statusLabel = getStatusLabel($newStatus ?? $ticket['status']);
+                            
+                            $whatsappMessage = "📋 *Ticket #{$ticket['ticket_number']}* - Action effectuée\n\n";
+                            $whatsappMessage .= "📌 *Action :* " . $actionLabel . "\n";
+                            $whatsappMessage .= "👤 *Par :* " . $_SESSION['user_name'] . "\n";
+                            $whatsappMessage .= "📊 *Statut :* " . $statusLabel . "\n\n";
+                            $whatsappMessage .= "📱 *Image récapitulative :*\n" . $imageData['url'] . "\n\n";
+                            $whatsappMessage .= "🔗 *Voir le ticket :*\n" . APP_URL . "/index.php?page=tickets&action=show&id=" . $ticketId . "\n\n";
+                            $whatsappMessage .= "---\n";
+                            $whatsappMessage .= "Plateforme de Ticketing - SPIDER Madagascar";
+                            
+                            $db->insert(
+                                "INSERT INTO whatsapp_queue (ticket_id, user_id, phone, message, image_url, status, created_at) 
+                                 VALUES (?, ?, ?, ?, ?, 'pending', NOW())",
+                                [$ticketId, $commercial['id'], $phone, $whatsappMessage, $imageData['url']]
+                            );
+                            
+                            error_log("📱 WhatsApp avec image en file d'attente pour " . $commercial['full_name']);
+                        }
+                    }
+                } catch (Exception $e) {
+                    error_log("❌ Erreur génération image WhatsApp: " . $e->getMessage());
+                }
+                
                 $actionLabels = [
                     'signaler_probleme' => '⚠️ Problème signalé avec succès',
                     'notifier_client' => '📢 Client notifié avec succès',
@@ -1003,6 +1033,54 @@ class TicketController {
                     );
                 }
                 
+                // ENVOI WHATSAPP STATUT AVEC IMAGE
+                try {
+                    $db = Database::getInstance();
+                    $imageGenerator = new WhatsAppImageGenerator();
+                    $senderName = $_SESSION['user_name'] ?? 'Responsable';
+                    
+                    $imageData = $imageGenerator->generateActionImage(
+                        $ticket, 
+                        $status, 
+                        $senderName, 
+                        ''
+                    );
+                    
+                    $db->insert(
+                        "INSERT INTO whatsapp_images (ticket_id, action_type, image_path, image_url, created_at) 
+                         VALUES (?, ?, ?, ?, NOW())",
+                        [$id, $status, $imageData['path'], $imageData['url']]
+                    );
+                    
+                    $commercial = $db->fetch("SELECT id, full_name, phone FROM users WHERE id = ?", [$ticket['created_by']]);
+                    
+                    if ($commercial && !empty($commercial['phone'])) {
+                        $phone = cleanPhoneNumber($commercial['phone']);
+                        if ($phone) {
+                            $oldStatusLabel = getStatusLabel($oldStatus);
+                            $newStatusLabel = getStatusLabel($status);
+                            
+                            $whatsappMessage = "📊 *Changement de statut - Ticket #{$ticket['ticket_number']}*\n\n";
+                            $whatsappMessage .= "👤 *Par :* " . $_SESSION['user_name'] . "\n";
+                            $whatsappMessage .= "📊 *Ancien statut :* " . $oldStatusLabel . "\n";
+                            $whatsappMessage .= "📊 *Nouveau statut :* " . $newStatusLabel . "\n";
+                            $whatsappMessage .= "📅 *Date :* " . date('d/m/Y à H:i') . "\n\n";
+                            $whatsappMessage .= "📱 *Image récapitulative :*\n" . $imageData['url'] . "\n\n";
+                            $whatsappMessage .= "🔗 *Voir le ticket :*\n" . APP_URL . "/index.php?page=tickets&action=show&id=" . $id;
+                            
+                            $db->insert(
+                                "INSERT INTO whatsapp_queue (ticket_id, user_id, phone, message, image_url, status, created_at) 
+                                 VALUES (?, ?, ?, ?, ?, 'pending', NOW())",
+                                [$id, $commercial['id'], $phone, $whatsappMessage, $imageData['url']]
+                            );
+                            
+                            error_log("📱 WhatsApp statut avec image en file d'attente pour " . $commercial['full_name']);
+                        }
+                    }
+                } catch (Exception $e) {
+                    error_log("❌ Erreur génération image WhatsApp statut: " . $e->getMessage());
+                }
+                
                 try {
                     $updatedTicket = $this->ticketModel->getTicketDetails($id);
                     if ($updatedTicket) {
@@ -1024,176 +1102,6 @@ class TicketController {
             
             setFlash('success', 'Statut du ticket mis à jour : ' . getStatusLabel($status));
             redirect('index.php?page=tickets&action=show&id=' . $id);
-        }
-    }
-    
-    // ============================================
-    // ASSIGNER UN TICKET
-    // ============================================
-    
-    public function assignTicket() {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $id = isset($_POST['ticket_id']) ? (int)$_POST['ticket_id'] : 0;
-            $assignedTo = isset($_POST['assigned_to']) ? $_POST['assigned_to'] : '';
-            $comment = isset($_POST['assignment_comment']) ? sanitize($_POST['assignment_comment']) : '';
-            
-            if ($id <= 0) {
-                if ($this->isAjax()) {
-                    $this->jsonResponse(['success' => false, 'error' => 'ID invalide']);
-                }
-                setFlash('danger', 'ID de ticket invalide.');
-                redirect('index.php?page=tickets&action=show&id=' . $id);
-            }
-            
-            $role = $_SESSION['user_role'] ?? 'commercial';
-            
-            if (!in_array($role, ['responsable_support_technique', 'admin', 'coordinateur'])) {
-                if ($this->isAjax()) {
-                    $this->jsonResponse(['success' => false, 'error' => 'Permission refusée']);
-                }
-                setFlash('danger', 'Vous n\'avez pas la permission d\'assigner ce ticket.');
-                redirect('index.php?page=tickets&action=show&id=' . $id);
-            }
-            
-            $ticket = $this->ticketModel->getTicketDetails($id);
-            
-            if (!$ticket) {
-                if ($this->isAjax()) {
-                    $this->jsonResponse(['success' => false, 'error' => 'Ticket non trouvé']);
-                }
-                setFlash('danger', 'Ticket non trouvé.');
-                redirect('index.php?page=tickets');
-            }
-            
-            if (!in_array($ticket['category'], ['support_technique', 'bureau_etude'])) {
-                if ($this->isAjax()) {
-                    $this->jsonResponse(['success' => false, 'error' => 'Catégorie non assignable']);
-                }
-                setFlash('danger', 'Ce ticket ne peut pas être assigné à un chargé d\'étude.');
-                redirect('index.php?page=tickets&action=show&id=' . $id);
-            }
-            
-            $db = Database::getInstance();
-            $link = "index.php?page=tickets&action=show&id=" . $id;
-            
-            if ($assignedTo === 'all') {
-                $charges = $db->fetchAll(
-                    "SELECT id, role, full_name, email FROM users 
-                     WHERE role IN ('charge_etude_electricite', 'charge_etude_courant_faible', 'charge_etude_climatisation')"
-                );
-                
-                if (empty($charges)) {
-                    if ($this->isAjax()) {
-                        $this->jsonResponse(['success' => false, 'error' => 'Aucun chargé d\'étude disponible']);
-                    }
-                    setFlash('danger', 'Aucun chargé d\'étude disponible.');
-                    redirect('index.php?page=tickets&action=show&id=' . $id);
-                }
-                
-                $userIds = array_column($charges, 'id');
-                $result = $this->ticketModel->assignToMultiple($id, $userIds, $_SESSION['user_id']);
-                
-                $successCount = $result['success'];
-                $errors = $result['errors'];
-                
-                $commentContent = "📌 Ticket assigné à " . $successCount . " chargé(s) d'étude par " . $_SESSION['user_name'];
-                if (!empty($comment)) {
-                    $commentContent .= "\n\n📝 " . $comment;
-                }
-                $this->ticketModel->addComment($id, $_SESSION['user_id'], $commentContent);
-                
-                $this->notificationModel->createNotification(
-                    $ticket['created_by'],
-                    "👤 Votre ticket {$ticket['ticket_number']} a été assigné à " . $successCount . " chargé(s) d'étude",
-                    $link,
-                    'assignation'
-                );
-                
-                foreach ($charges as $charge) {
-                    $message = "📌 Ticket #{$ticket['ticket_number']} vous a été assigné par " . $_SESSION['user_name'];
-                    $this->notificationModel->createNotification($charge['id'], $message, $link, 'assignation');
-                }
-                
-                try {
-                    $this->emailManager->notifyAssignmentAll($ticket, $_SESSION['user_name']);
-                } catch (Exception $e) {
-                    error_log("❌ Erreur envoi emails assignation: " . $e->getMessage());
-                }
-                
-                if ($this->isAjax()) {
-                    $this->jsonResponse([
-                        'success' => true,
-                        'message' => 'Ticket assigné à ' . $successCount . ' chargé(s) d\'étude !',
-                        'assigned_count' => $successCount
-                    ]);
-                }
-                
-                if (!empty($errors)) {
-                    setFlash('warning', '⚠️ Ticket assigné à ' . $successCount . ' chargé(s) d\'étude. Erreurs pour : ' . implode(', ', $errors));
-                } else {
-                    setFlash('success', '✅ Ticket assigné avec succès à ' . $successCount . ' chargé(s) d\'étude !');
-                }
-                redirect('index.php?page=tickets&action=show&id=' . $id);
-                
-            } else {
-                $assignedTo = (int)$assignedTo;
-                
-                if ($assignedTo <= 0) {
-                    if ($this->isAjax()) {
-                        $this->jsonResponse(['success' => false, 'error' => 'Sélectionnez un chargé d\'étude']);
-                    }
-                    setFlash('danger', 'Veuillez sélectionner un chargé d\'étude.');
-                    redirect('index.php?page=tickets&action=show&id=' . $id);
-                }
-                
-                $technician = $db->fetch(
-                    "SELECT id, role, full_name, email FROM users 
-                     WHERE id = ? AND role IN ('charge_etude_electricite', 'charge_etude_courant_faible', 'charge_etude_climatisation')",
-                    [$assignedTo]
-                );
-                
-                if (!$technician) {
-                    if ($this->isAjax()) {
-                        $this->jsonResponse(['success' => false, 'error' => 'Technicien invalide']);
-                    }
-                    setFlash('danger', 'Ce technicien n\'est pas un chargé d\'étude valide.');
-                    redirect('index.php?page=tickets&action=show&id=' . $id);
-                }
-                
-                $result = $this->ticketModel->assignToMultiple($id, [$assignedTo], $_SESSION['user_id']);
-                
-                $commentContent = "📌 Ticket assigné à " . $technician['full_name'] . " par " . $_SESSION['user_name'];
-                if (!empty($comment)) {
-                    $commentContent .= "\n\n📝 " . $comment;
-                }
-                $this->ticketModel->addComment($id, $_SESSION['user_id'], $commentContent);
-                
-                $this->notificationModel->createNotification(
-                    $ticket['created_by'],
-                    "👤 Votre ticket {$ticket['ticket_number']} a été assigné à " . $technician['full_name'],
-                    $link,
-                    'assignation'
-                );
-                
-                $this->notificationModel->createNotification($assignedTo, "📌 Nouveau ticket #{$ticket['ticket_number']} vous a été assigné par " . $_SESSION['user_name'], $link, 'assignation');
-                
-                try {
-                    $this->emailManager->notifyAssignmentUnique($ticket, $technician, $_SESSION['user_name']);
-                } catch (Exception $e) {
-                    error_log("❌ Erreur envoi email assignation: " . $e->getMessage());
-                }
-                
-                if ($this->isAjax()) {
-                    $this->jsonResponse([
-                        'success' => true,
-                        'message' => 'Ticket assigné à ' . $technician['full_name'] . ' avec succès !',
-                        'assigned_to' => $technician['full_name']
-                    ]);
-                }
-                
-                setFlash('success', '✅ Ticket assigné à ' . $technician['full_name'] . ' avec succès !');
-                redirect('index.php?page=tickets&action=show&id=' . $id);
-            }
         }
     }
     
@@ -1298,64 +1206,7 @@ class TicketController {
     }
     
     // ============================================
-    // RÉPONDRE AU COMMERCIAL
-    // ============================================
-    
-    public function returnToCommercial() {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $id = isset($_POST['ticket_id']) ? (int)$_POST['ticket_id'] : 0;
-            $message = sanitize($_POST['return_message'] ?? '');
-            
-            if ($id <= 0) {
-                setFlash('danger', 'ID de ticket invalide.');
-                redirect('index.php?page=tickets');
-            }
-            
-            $ticket = $this->ticketModel->getTicketDetails($id);
-            
-            if (!$ticket) {
-                setFlash('danger', 'Ticket non trouvé.');
-                redirect('index.php?page=tickets');
-            }
-            
-            $role = $_SESSION['user_role'] ?? 'commercial';
-            
-            if (!in_array($role, ['admin', 'coordinateur', 'responsable_support_technique', 'responsable_sav', 'responsable_travaux'])) {
-                setFlash('danger', 'Vous n\'avez pas la permission de faire un retour.');
-                redirect('index.php?page=tickets&action=show&id=' . $id);
-            }
-            
-            if (empty($message)) {
-                setFlash('danger', 'Veuillez saisir un message de retour.');
-                redirect('index.php?page=tickets&action=show&id=' . $id);
-            }
-            
-            $this->ticketModel->update($id, array(
-                'return_message' => $message,
-                'returned_by' => $_SESSION['user_id'],
-                'returned_at' => date('Y-m-d H:i:s')
-            ));
-            
-            $this->notificationModel->createNotification(
-                $ticket['created_by'],
-                "📧 Retour du responsable sur votre ticket {$ticket['ticket_number']}",
-                "index.php?page=tickets&action=show&id=" . $id,
-                'action'
-            );
-            
-            try {
-                $this->notificationManager->notifyReturn($ticket, $message, $_SESSION['user_name'] ?? 'Utilisateur');
-            } catch (Exception $e) {
-                error_log("Erreur d'envoi d'email: " . $e->getMessage());
-            }
-            
-            setFlash('success', 'Retour envoyé au responsable.');
-            redirect('index.php?page=tickets&action=show&id=' . $id);
-        }
-    }
-    
-    // ============================================
-    // ✅ FONCTIONS DE PERMISSIONS - DÉFINITIVES
+    // PERMISSIONS
     // ============================================
     
     private function canViewTicket($ticket) {

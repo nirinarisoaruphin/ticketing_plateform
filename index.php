@@ -1,9 +1,8 @@
 <?php
-// index.php - Routeur principal - VERSION COMPLÈTE CORRIGÉE
+// index.php - Routeur principal - VERSION COMPLÈTE AVEC WHATSAPP
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
-// index.php - AJOUTER CETTE ROUTE EN HAUT
 
 // ✅ ROUTE POUR api_handler.php (indépendant)
 if (strpos($_SERVER['REQUEST_URI'], 'api_handler.php') !== false) {
@@ -173,6 +172,9 @@ switch ($page) {
             case 'history':
                 $controller->history();
                 break;
+            case 'check_status':
+                $controller->checkStatus();
+                break;
             default:
                 $controller->index();
                 break;
@@ -230,6 +232,15 @@ switch ($page) {
         require_once __DIR__ . '/controllers/MessagesController.php';
         $controller = new MessagesController();
         $controller->index();
+        break;
+    
+    // ============================================
+    // WHATSAPP SHARE - NOUVEAU
+    // ============================================
+    case 'whatsapp_share':
+        require_once __DIR__ . '/controllers/WhatsAppController.php';
+        $controller = new WhatsAppController();
+        $controller->share();
         break;
     
     // ============================================
@@ -298,6 +309,11 @@ switch ($page) {
                 $controller->getTickets();
                 break;
             
+            // ✅ COMPTER LES MESSAGES
+            case 'count_messages':
+                $controller->countMessages();
+                break;
+            
             // ✅ SUPPRESSION TICKET
             case 'delete_ticket':
                 $controller->deleteTicket();
@@ -310,22 +326,21 @@ switch ($page) {
         }
         break;
     
-
-// ============================================
-// EXPORT
-// ============================================
-case 'export':
-    require_once __DIR__ . '/controllers/ExportController.php';
-    $controller = new ExportController();
-    
-    // Si un format est spécifié, exporter
-    if (isset($_GET['format']) && !empty($_GET['format'])) {
-        $controller->export();
-    } else {
-        // Sinon afficher la page d'exportation
-        $controller->index();
-    }
-    break;
+    // ============================================
+    // EXPORT
+    // ============================================
+    case 'export':
+        require_once __DIR__ . '/controllers/ExportController.php';
+        $controller = new ExportController();
+        
+        // Si un format est spécifié, exporter
+        if (isset($_GET['format']) && !empty($_GET['format'])) {
+            $controller->export();
+        } else {
+            // Sinon afficher la page d'exportation
+            $controller->index();
+        }
+        break;
     
     // ============================================
     // PAGE 404
