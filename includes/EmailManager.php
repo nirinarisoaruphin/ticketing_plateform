@@ -323,7 +323,7 @@ class EmailManager {
         // Déterminer le titre et le contenu selon le type
         switch ($type) {
             case 'created':
-                $headerTitle = '📌 Nouveau ticket créé';
+                $headerTitle = 'Nouveau ticket créé';
                 $headerColor = '#2563eb';
                 $headerIcon = 'fa-ticket-alt'; // ✅ DÉFINI
                 $content = '
