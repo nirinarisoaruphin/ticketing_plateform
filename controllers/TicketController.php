@@ -206,22 +206,18 @@ class TicketController {
                 $assignedTo = $admin ? $admin['id'] : 1;
             }
             
-            $ticketNumber = generateTicketNumber($category);
-            
-            $existingTicket = $db->fetch(
-                "SELECT id FROM tickets WHERE ticket_number = ?",
-                [$ticketNumber]
-            );
-            
-            if ($existingTicket) {
+            try {
                 $ticketNumber = generateTicketNumber($category);
-                $existingTicket2 = $db->fetch(
-                    "SELECT id FROM tickets WHERE ticket_number = ?",
-                    [$ticketNumber]
-                );
-                if ($existingTicket2) {
-                    $ticketNumber = $ticketNumber . '-' . strtoupper(substr(md5(uniqid()), 0, 4));
+            } catch (Exception $e) {
+                error_log("❌ Génération du numéro de ticket impossible : " . $e->getMessage());
+                if ($this->isAjax()) {
+                    $this->jsonResponse([
+                        'success' => false,
+                        'error' => 'Impossible de générer un numéro de ticket. Veuillez réessayer.'
+                    ]);
                 }
+                setFlash('danger', 'Impossible de générer un numéro de ticket. Veuillez réessayer.');
+                redirect('index.php?page=tickets&action=create');
             }
             
             $userName = $_SESSION['user_name'] ?? 'Utilisateur';

@@ -542,13 +542,64 @@ function getUserTeam($role) {
 // ============================================
 
 /**
- * Générer un numéro de ticket UNIQUE - CORRIGÉ AVEC TICKET_SEQUENCES
+ * Générer un numéro de ticket UNIQUE - VERSION AUTO-RÉPARATRICE
+ *
+ * ✅ CORRECTIF DOUBLONS : l'ancienne version retombait sur un
+ * COUNT(*) "fallback" dès que la table ticket_sequences était
+ * absente ou mal initialisée (clé primaire composite manquante).
+ * Ce fallback n'est PAS atomique : deux créations de ticket
+ * simultanées pouvaient lire le même COUNT() et produire le
+ * même ticket_number => erreur "Duplicate entry" / tickets
+ * en double.
+ *
+ * Cette version s'assure d'abord que la table ticket_sequences
+ * (avec sa clé primaire composite) ET la contrainte UNIQUE sur
+ * tickets.ticket_number existent réellement, puis utilise
+ * exclusivement le compteur atomique. Le fallback COUNT() est
+ * supprimé : en cas d'échec du compteur atomique, on lève une
+ * exception plutôt que de générer un numéro non fiable.
  */
+function ensureTicketSequenceSchema(PDO $pdo) {
+    static $checked = false;
+    if ($checked) {
+        return;
+    }
+
+    // Table du compteur atomique, avec clé primaire composite obligatoire
+    $pdo->exec(
+        "CREATE TABLE IF NOT EXISTS ticket_sequences (
+            category_prefix VARCHAR(20) NOT NULL,
+            year INT NOT NULL,
+            next_number INT NOT NULL DEFAULT 0,
+            PRIMARY KEY (category_prefix, year)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
+    );
+
+    // Contrainte UNIQUE sur tickets.ticket_number : dernier filet de
+    // sécurité côté base de données contre les doublons.
+    try {
+        $indexExists = $pdo->query(
+            "SHOW INDEX FROM tickets WHERE Key_name = 'uniq_ticket_number'"
+        )->fetch();
+        if (!$indexExists) {
+            $pdo->exec("ALTER TABLE tickets ADD UNIQUE KEY uniq_ticket_number (ticket_number)");
+        }
+    } catch (Exception $e) {
+        // Des doublons existent peut-être déjà en base : on log au lieu
+        // de bloquer la création de tickets. Voir sql/nettoyage_doublons.sql
+        error_log("⚠️ Impossible d'ajouter la contrainte UNIQUE sur ticket_number : " . $e->getMessage()
+            . " — exécutez sql/nettoyage_doublons.sql puis réessayez.");
+    }
+
+    $checked = true;
+}
+
 function generateTicketNumber($category = null) {
     $db = Database::getInstance();
-    
+    $pdo = $db->getPDO();
+
     $prefix = 'TK-';
-    
+
     switch ($category) {
         case 'support_technique':
         case 'bureau_etude':
@@ -564,35 +615,30 @@ function generateTicketNumber($category = null) {
             $prefix = 'TK-GEN';
             break;
     }
-    
+
     $year = date('Y');
-    
-    try {
-        // ✅ Utiliser la table ticket_sequences pour un compteur atomique
-        $pdo = $db->getPDO();
-        $stmt = $pdo->prepare(
-            "INSERT INTO ticket_sequences (category_prefix, year, next_number)
-             VALUES (?, ?, LAST_INSERT_ID(1))
-             ON DUPLICATE KEY UPDATE next_number = LAST_INSERT_ID(next_number + 1)"
-        );
-        $stmt->execute([$prefix, $year]);
-        $nextNumber = (int)$pdo->lastInsertId();
-        
-        // Sécurité : ne jamais accepter 0
-        if ($nextNumber < 1) {
-            throw new Exception("Compteur invalide retourné (0), fallback nécessaire");
-        }
-    } catch (Exception $e) {
-        // ✅ Fallback si la table n'existe pas encore
-        error_log("⚠️ ticket_sequences indisponible, fallback COUNT(): " . $e->getMessage());
-        $likePattern = $prefix . $year . '%';
-        $count = $db->fetch(
-            "SELECT COUNT(*) as count FROM tickets WHERE ticket_number LIKE ?",
-            [$likePattern]
-        );
-        $nextNumber = ($count ? (int)$count['count'] : 0) + 1;
+
+    ensureTicketSequenceSchema($pdo);
+
+    // ✅ Compteur atomique : INSERT ... ON DUPLICATE KEY UPDATE avec
+    // LAST_INSERT_ID(expr) est garanti atomique par MySQL/InnoDB, même
+    // avec plusieurs créations de tickets simultanées.
+    $stmt = $pdo->prepare(
+        "INSERT INTO ticket_sequences (category_prefix, year, next_number)
+         VALUES (?, ?, LAST_INSERT_ID(1))
+         ON DUPLICATE KEY UPDATE next_number = LAST_INSERT_ID(next_number + 1)"
+    );
+    $stmt->execute([$prefix, $year]);
+    $nextNumber = (int)$pdo->lastInsertId();
+
+    if ($nextNumber < 1) {
+        // Ne devrait plus jamais arriver une fois le schéma garanti,
+        // mais on refuse explicitement plutôt que de générer un
+        // numéro potentiellement dupliqué.
+        error_log("❌ generateTicketNumber() - compteur atomique invalide (0) pour $prefix/$year");
+        throw new Exception("Impossible de générer un numéro de ticket unique, veuillez réessayer.");
     }
-    
+
     $number = str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
     return $prefix . $year . '-' . $number;
 }

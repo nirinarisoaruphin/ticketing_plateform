@@ -325,15 +325,11 @@ class Ticket extends Model {
             
             if ($existing) {
                 $category = $data['category'] ?? 'support_technique';
-                $data['ticket_number'] = generateTicketNumber($category);
-                
-                $existing2 = $db->fetch(
-                    "SELECT id FROM tickets WHERE ticket_number = ?",
-                    [$data['ticket_number']]
-                );
-                
-                if ($existing2) {
-                    $data['ticket_number'] = $data['ticket_number'] . '-' . strtoupper(substr(md5(uniqid()), 0, 4));
+                try {
+                    $data['ticket_number'] = generateTicketNumber($category) . '-' . strtoupper(substr(md5(uniqid()), 0, 4));
+                } catch (Exception $e) {
+                    error_log("❌ Ticket::create - régénération ticket_number impossible : " . $e->getMessage());
+                    return false;
                 }
             }
         }
@@ -379,7 +375,12 @@ class Ticket extends Model {
                 if ($isDuplicateKey && $attempt < $maxAttempts && isset($filteredData['ticket_number'])) {
                     error_log("⚠️ Collision ticket_number (tentative $attempt), régénération...");
                     $category = $filteredData['category'] ?? 'support_technique';
-                    $filteredData['ticket_number'] = generateTicketNumber($category) . '-' . strtoupper(substr(md5(uniqid()), 0, 4));
+                    try {
+                        $filteredData['ticket_number'] = generateTicketNumber($category) . '-' . strtoupper(substr(md5(uniqid()), 0, 4));
+                    } catch (Exception $e2) {
+                        error_log("❌ Régénération ticket_number impossible : " . $e2->getMessage());
+                        return false;
+                    }
                     $sql = "INSERT INTO tickets (" . implode(', ', array_keys($filteredData)) . ") 
                             VALUES (" . implode(', ', array_fill(0, count($filteredData), '?')) . ")";
                     continue;
