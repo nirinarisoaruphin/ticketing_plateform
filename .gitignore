@@ -1,0 +1,27 @@
+# Dépendances
+/vendor/
+/node_modules/
+
+# Fichiers d'environnement
+.env
+.env.local
+.env.*.local
+
+# Logs
+/logs/
+*.log
+
+# Uploads et fichiers temporaires
+/uploads/
+*.tmp
+*.temp
+
+# Cache et fichiers système
+.DS_Store
+Thumbs.db
+*.zip
+*.rar
+
+# IDE
+.vscode/
+.idea/
