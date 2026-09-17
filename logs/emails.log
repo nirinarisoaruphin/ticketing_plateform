@@ -1,0 +1,382 @@
+2026-09-04 06:49:48 | 📧 EmailManager initialisé
+2026-09-04 06:50:37 | 📧 EmailManager initialisé
+2026-09-04 06:51:11 | 📧 EmailManager initialisé
+2026-09-07 05:25:20 | 📧 EmailManager initialisé
+2026-09-07 05:29:51 | 📧 EmailManager initialisé
+2026-09-07 05:33:04 | 📧 EmailManager initialisé
+2026-09-07 05:33:15 | 📧 EmailManager initialisé
+2026-09-07 05:33:33 | 📧 EmailManager initialisé
+2026-09-07 05:36:20 | 📧 EmailManager initialisé
+2026-09-07 14:03:42 | EmailManager initialisé
+2026-09-07 14:03:46 | EmailManager initialisé
+2026-09-07 14:04:09 | EmailManager initialisé
+2026-09-07 14:04:17 | EmailManager initialisé
+<<<<<<< HEAD
+2026-09-07 14:47:54 | EmailManager initialisé
+2026-09-07 14:47:58 | EmailManager initialisé
+2026-09-07 14:48:11 | EmailManager initialisé
+2026-09-07 14:50:17 | EmailManager initialisé
+2026-09-07 14:52:30 | EmailManager initialisé
+2026-09-07 14:52:38 | EmailManager initialisé
+2026-09-07 14:52:38 | EmailManager initialisé
+2026-09-07 14:55:46 | EmailManager initialisé
+2026-09-07 14:55:53 | EmailManager initialisé
+=======
+2026-09-07 15:36:55 | EmailManager initialisé
+2026-09-07 15:40:40 | EmailManager initialisé
+2026-09-07 16:23:39 | EmailManager initialisé
+2026-09-07 16:23:42 | EmailManager initialisé
+2026-09-07 16:23:45 | EmailManager initialisé
+2026-09-07 16:24:37 | EmailManager initialisé
+2026-09-07 16:25:10 | EmailManager initialisé
+2026-09-07 16:25:29 | EmailManager initialisé
+2026-09-07 16:25:31 | EmailManager initialisé
+2026-09-07 16:28:43 | EmailManager initialisé
+2026-09-07 16:28:55 | EmailManager initialisé
+2026-09-07 16:28:57 | EmailManager initialisé
+2026-09-07 16:31:44 | EmailManager initialisé
+2026-09-07 16:31:48 | EmailManager initialisé
+2026-09-07 16:32:37 | EmailManager initialisé
+2026-09-07 16:32:47 | EmailManager initialisé
+<<<<<<< HEAD
+>>>>>>> 0258b2d (Suppression des doublons sur le plateforme)
+=======
+2026-09-07 16:41:26 | EmailManager initialisé
+2026-09-07 16:42:35 | EmailManager initialisé
+2026-09-07 16:42:56 | EmailManager initialisé
+2026-09-07 16:43:10 | EmailManager initialisé
+2026-09-07 16:43:17 | To: ralijaonanirinarisoa@gmail.com | Subject: Ticket résolu - Ticket TK-SAV2026-0002 | Status: SUCCESS
+2026-09-07 16:43:17 | Email d'action envoyé à : ralijaonanirinarisoa@gmail.com
+2026-09-07 16:43:23 | To: andriamiarintsoamirana@spider.mg | Subject: Ticket résolu - Ticket TK-SAV2026-0002 | Status: SUCCESS
+2026-09-07 16:43:23 | Email d'action envoyé à : andriamiarintsoamirana@spider.mg
+2026-09-07 16:43:29 | To: dina@spider.mg | Subject: Ticket résolu - Ticket TK-SAV2026-0002 | Status: SUCCESS
+2026-09-07 16:43:29 | Email d'action envoyé à : dina@spider.mg
+2026-09-07 16:43:34 | To: josoa@spider.mg | Subject: Ticket résolu - Ticket TK-SAV2026-0002 | Status: SUCCESS
+2026-09-07 16:43:34 | Email d'action envoyé à : josoa@spider.mg
+2026-09-07 16:43:34 | 4 emails d'action envoyés
+2026-09-07 16:43:34 | WhatsApp en file d'attente pour Josoa (261330000000)
+2026-09-07 16:43:34 | EmailManager initialisé
+2026-09-07 16:43:34 | EmailManager initialisé
+2026-09-07 16:45:00 | EmailManager initialisé
+2026-09-07 16:47:02 | EmailManager initialisé
+2026-09-07 16:49:42 | EmailManager initialisé
+2026-09-07 16:49:56 | EmailManager initialisé
+2026-09-07 16:51:27 | EmailManager initialisé
+2026-09-07 16:51:38 | EmailManager initialisé
+2026-09-07 16:51:41 | EmailManager initialisé
+2026-09-07 16:51:43 | EmailManager initialisé
+2026-09-07 16:52:07 | EmailManager initialisé
+2026-09-07 16:52:26 | EmailManager initialisé
+2026-09-07 16:52:26 | NOTIFICATION CRÉATION: Ticket TK-TVX2026-0001
+2026-09-07 16:52:26 | Total destinataires: 4
+2026-09-07 16:52:32 | To: ralijaonanirinarisoa@gmail.com | Subject: Nouveau ticket TK-TVX2026-0001 - TK-TVX20260907-20260907165214-3723 | Status: SUCCESS
+2026-09-07 16:52:32 | Email envoyé à : ralijaonanirinarisoa@gmail.com
+2026-09-07 16:52:38 | To: andriamiarintsoamirana@spider.mg | Subject: Nouveau ticket TK-TVX2026-0001 - TK-TVX20260907-20260907165214-3723 | Status: SUCCESS
+2026-09-07 16:52:38 | Email envoyé à : andriamiarintsoamirana@spider.mg
+2026-09-07 16:52:43 | To: andry@spider.mg | Subject: Nouveau ticket TK-TVX2026-0001 - TK-TVX20260907-20260907165214-3723 | Status: SUCCESS
+2026-09-07 16:52:43 | Email envoyé à : andry@spider.mg
+2026-09-07 16:52:51 | To: dina@spider.mg | Subject: Nouveau ticket TK-TVX2026-0001 - TK-TVX20260907-20260907165214-3723 | Status: SUCCESS
+2026-09-07 16:52:51 | Email envoyé à : dina@spider.mg
+2026-09-07 16:52:51 | 4 emails envoyés sur 4
+2026-09-07 16:52:52 | EmailManager initialisé
+2026-09-07 16:52:52 | EmailManager initialisé
+2026-09-07 16:53:39 | EmailManager initialisé
+<<<<<<< HEAD
+>>>>>>> de5c9a8 (Memoire M2)
+=======
+2026-09-08 10:07:14 | EmailManager initialisé
+2026-09-08 10:13:27 | EmailManager initialisé
+2026-09-08 10:15:53 | EmailManager initialisé
+2026-09-08 10:22:59 | EmailManager initialisé
+2026-09-08 10:25:06 | EmailManager initialisé
+2026-09-08 10:25:07 | EmailManager initialisé
+>>>>>>> 21a89e4 (Boky mémoire fin d'étude M2)
+2026-09-08 11:19:25 | EmailManager initialisé
+2026-09-08 11:22:10 | EmailManager initialisé
+2026-09-08 15:21:46 | EmailManager initialisé
+2026-09-08 16:07:13 | EmailManager initialisé
+2026-09-08 16:10:07 | EmailManager initialisé
+2026-09-08 16:10:10 | EmailManager initialisé
+2026-09-08 16:10:14 | EmailManager initialisé
+2026-09-08 16:10:22 | EmailManager initialisé
+2026-09-08 16:10:28 | To: ralijaonanirinarisoa@gmail.com | Subject: Ticket en attente - Ticket TK-TVX2026-0001 | Status: SUCCESS
+2026-09-08 16:10:28 | Email d'action envoyé à : ralijaonanirinarisoa@gmail.com
+2026-09-08 16:10:32 | To: andriamiarintsoamirana@spider.mg | Subject: Ticket en attente - Ticket TK-TVX2026-0001 | Status: SUCCESS
+2026-09-08 16:10:32 | Email d'action envoyé à : andriamiarintsoamirana@spider.mg
+2026-09-08 16:10:37 | To: andry@spider.mg | Subject: Ticket en attente - Ticket TK-TVX2026-0001 | Status: SUCCESS
+2026-09-08 16:10:37 | Email d'action envoyé à : andry@spider.mg
+2026-09-08 16:10:41 | To: dina@spider.mg | Subject: Ticket en attente - Ticket TK-TVX2026-0001 | Status: SUCCESS
+2026-09-08 16:10:41 | Email d'action envoyé à : dina@spider.mg
+2026-09-08 16:10:41 | 4 emails d'action envoyés
+2026-09-08 16:10:41 | WhatsApp en file d'attente pour Dina (261340000000)
+2026-09-08 16:10:41 | EmailManager initialisé
+2026-09-08 16:11:20 | EmailManager initialisé
+2026-09-08 16:15:05 | EmailManager initialisé
+2026-09-08 16:15:27 | EmailManager initialisé
+2026-09-08 16:15:43 | EmailManager initialisé
+2026-09-08 16:19:47 | EmailManager initialisé
+2026-09-08 16:19:49 | EmailManager initialisé
+2026-09-08 16:37:48 | EmailManager initialisé
+2026-09-08 16:37:52 | EmailManager initialisé
+2026-09-08 16:37:52 | EmailManager initialisé
+2026-09-08 16:37:54 | EmailManager initialisé
+2026-09-08 16:37:56 | EmailManager initialisé
+2026-09-08 16:37:58 | EmailManager initialisé
+2026-09-08 16:37:58 | EmailManager initialisé
+2026-09-08 16:38:00 | EmailManager initialisé
+2026-09-08 16:38:00 | EmailManager initialisé
+2026-09-08 16:38:03 | EmailManager initialisé
+2026-09-08 16:38:31 | EmailManager initialisé
+2026-09-09 08:21:11 | EmailManager initialisé
+2026-09-09 08:21:14 | EmailManager initialisé
+2026-09-09 08:21:14 | EmailManager initialisé
+2026-09-09 08:21:16 | EmailManager initialisé
+2026-09-09 08:21:23 | EmailManager initialisé
+2026-09-09 08:27:24 | EmailManager initialisé
+2026-09-09 09:31:04 | EmailManager initialisé
+2026-09-09 09:31:27 | EmailManager initialisé
+2026-09-09 09:31:36 | EmailManager initialisé
+2026-09-09 10:02:09 | EmailManager initialisé
+2026-09-09 10:26:07 | EmailManager initialisé
+2026-09-09 16:40:58 | EmailManager initialisé
+2026-09-09 16:41:05 | EmailManager initialisé
+2026-09-09 16:41:20 | EmailManager initialisé
+2026-09-09 16:41:26 | To: ralijaonanirinarisoa@gmail.com | Subject: Ticket TK-ST2026-0002 - Assignation | Status: SUCCESS
+2026-09-09 16:41:26 | Email assignation envoyé à : ralijaonanirinarisoa@gmail.com
+2026-09-09 16:41:30 | To: andriamiarintsoamirana@spider.mg | Subject: Ticket TK-ST2026-0002 - Assignation | Status: SUCCESS
+2026-09-09 16:41:30 | Email assignation envoyé à : andriamiarintsoamirana@spider.mg
+2026-09-09 16:41:34 | To: maheryy@spider.mg | Subject: Ticket TK-ST2026-0002 - Assignation | Status: SUCCESS
+2026-09-09 16:41:34 | Email assignation envoyé à : maheryy@spider.mg
+2026-09-09 16:41:38 | To: miora@spider.mg | Subject: Ticket TK-ST2026-0002 - Assignation | Status: SUCCESS
+2026-09-09 16:41:38 | Email assignation envoyé à : miora@spider.mg
+2026-09-09 16:41:42 | To: anthony@spider.mg | Subject: Ticket TK-ST2026-0002 - Assignation | Status: SUCCESS
+2026-09-09 16:41:42 | Email assignation envoyé à : anthony@spider.mg
+2026-09-09 16:41:42 | 5 emails d'assignation envoyés
+2026-09-09 16:41:42 | WhatsApp assignation en file d'attente pour Miora
+2026-09-09 16:41:42 | WhatsApp assignation en file d'attente pour Anthony
+2026-09-09 16:41:42 | EmailManager initialisé
+2026-09-09 16:42:09 | EmailManager initialisé
+2026-09-11 10:35:25 | EmailManager initialisé
+2026-09-11 10:38:13 | EmailManager initialisé
+2026-09-11 10:38:28 | EmailManager initialisé
+2026-09-11 13:54:45 | EmailManager initialisé
+2026-09-11 13:54:48 | EmailManager initialisé
+2026-09-11 13:54:50 | EmailManager initialisé
+2026-09-11 13:54:58 | EmailManager initialisé
+2026-09-11 14:04:04 | EmailManager initialisé
+2026-09-11 14:04:08 | EmailManager initialisé
+2026-09-11 14:04:40 | EmailManager initialisé
+2026-09-11 14:26:12 | EmailManager initialisé
+2026-09-11 15:15:31 | EmailManager initialisé
+2026-09-11 15:15:41 | EmailManager initialisé
+2026-09-11 15:15:41 | EmailManager initialisé
+2026-09-11 15:16:12 | EmailManager initialisé
+2026-09-11 15:16:41 | EmailManager initialisé
+2026-09-11 15:16:41 | NOTIFICATION CRÉATION: Ticket TK-TVX2026-0002
+2026-09-11 15:16:41 | Total destinataires: 4
+2026-09-11 15:16:46 | To: ralijaonanirinarisoa@gmail.com | Subject: Nouveau ticket TK-TVX2026-0002 - TK-TVX20260911-20260911151614-8592 | Status: SUCCESS
+2026-09-11 15:16:46 | Email envoyé à : ralijaonanirinarisoa@gmail.com
+2026-09-11 15:16:50 | To: andriamiarintsoamirana@spider.mg | Subject: Nouveau ticket TK-TVX2026-0002 - TK-TVX20260911-20260911151614-8592 | Status: SUCCESS
+2026-09-11 15:16:50 | Email envoyé à : andriamiarintsoamirana@spider.mg
+2026-09-11 15:16:55 | To: andry@spider.mg | Subject: Nouveau ticket TK-TVX2026-0002 - TK-TVX20260911-20260911151614-8592 | Status: SUCCESS
+2026-09-11 15:16:55 | Email envoyé à : andry@spider.mg
+2026-09-11 15:16:59 | To: josoa@spider.mg | Subject: Nouveau ticket TK-TVX2026-0002 - TK-TVX20260911-20260911151614-8592 | Status: SUCCESS
+2026-09-11 15:16:59 | Email envoyé à : josoa@spider.mg
+2026-09-11 15:16:59 | 4 emails envoyés sur 4
+2026-09-11 15:16:59 | EmailManager initialisé
+2026-09-11 15:18:22 | EmailManager initialisé
+2026-09-11 15:18:47 | EmailManager initialisé
+2026-09-11 15:18:53 | EmailManager initialisé
+2026-09-11 15:18:55 | EmailManager initialisé
+2026-09-11 15:18:57 | EmailManager initialisé
+2026-09-11 15:20:18 | EmailManager initialisé
+2026-09-11 15:20:18 | NOTIFICATION CRÉATION: Ticket TK-TVX2026-0003
+2026-09-11 15:20:18 | Total destinataires: 4
+2026-09-11 15:20:28 | To: ralijaonanirinarisoa@gmail.com | Subject: Nouveau ticket TK-TVX2026-0003 - TK-TVX20260911-20260911151859-7260 | Status: SUCCESS
+2026-09-11 15:20:28 | Email envoyé à : ralijaonanirinarisoa@gmail.com
+2026-09-11 15:20:33 | To: andriamiarintsoamirana@spider.mg | Subject: Nouveau ticket TK-TVX2026-0003 - TK-TVX20260911-20260911151859-7260 | Status: SUCCESS
+2026-09-11 15:20:33 | Email envoyé à : andriamiarintsoamirana@spider.mg
+2026-09-11 15:20:39 | To: andry@spider.mg | Subject: Nouveau ticket TK-TVX2026-0003 - TK-TVX20260911-20260911151859-7260 | Status: SUCCESS
+2026-09-11 15:20:39 | Email envoyé à : andry@spider.mg
+2026-09-11 15:20:47 | To: miora@spider.mg | Subject: Nouveau ticket TK-TVX2026-0003 - TK-TVX20260911-20260911151859-7260 | Status: SUCCESS
+2026-09-11 15:20:47 | Email envoyé à : miora@spider.mg
+2026-09-11 15:20:47 | 4 emails envoyés sur 4
+2026-09-11 15:20:47 | EmailManager initialisé
+2026-09-11 15:22:54 | EmailManager initialisé
+2026-09-11 15:23:11 | EmailManager initialisé
+2026-09-11 15:24:02 | EmailManager initialisé
+2026-09-11 15:41:16 | EmailManager initialisé
+2026-09-11 15:41:23 | EmailManager initialisé
+2026-09-11 15:41:23 | EmailManager initialisé
+2026-09-11 15:41:44 | EmailManager initialisé
+2026-09-11 15:41:54 | EmailManager initialisé
+2026-09-11 15:42:37 | EmailManager initialisé
+2026-09-11 15:43:31 | EmailManager initialisé
+2026-09-11 15:43:31 | NOTIFICATION CRÉATION: Ticket TK-TVX2026-0004
+2026-09-11 15:43:31 | Total destinataires: 4
+2026-09-11 15:43:37 | To: ralijaonanirinarisoa@gmail.com | Subject: Nouveau ticket TK-TVX2026-0004 - TK-TVX20260911-20260911154239-7187 | Status: SUCCESS
+2026-09-11 15:43:37 | Email envoyé à : ralijaonanirinarisoa@gmail.com
+2026-09-11 15:43:42 | To: andriamiarintsoamirana@spider.mg | Subject: Nouveau ticket TK-TVX2026-0004 - TK-TVX20260911-20260911154239-7187 | Status: SUCCESS
+2026-09-11 15:43:42 | Email envoyé à : andriamiarintsoamirana@spider.mg
+2026-09-11 15:43:46 | To: andry@spider.mg | Subject: Nouveau ticket TK-TVX2026-0004 - TK-TVX20260911-20260911154239-7187 | Status: SUCCESS
+2026-09-11 15:43:46 | Email envoyé à : andry@spider.mg
+2026-09-11 15:43:51 | To: miora@spider.mg | Subject: Nouveau ticket TK-TVX2026-0004 - TK-TVX20260911-20260911154239-7187 | Status: SUCCESS
+2026-09-11 15:43:51 | Email envoyé à : miora@spider.mg
+2026-09-11 15:43:51 | 4 emails envoyés sur 4
+2026-09-11 15:43:51 | EmailManager initialisé
+2026-09-11 15:44:36 | EmailManager initialisé
+2026-09-11 15:57:32 | EmailManager initialisé
+2026-09-11 15:58:10 | EmailManager initialisé
+2026-09-11 15:58:20 | EmailManager initialisé
+2026-09-11 15:58:20 | EmailManager initialisé
+2026-09-11 15:58:28 | EmailManager initialisé
+2026-09-11 16:02:28 | EmailManager initialisé
+2026-09-11 16:02:55 | EmailManager initialisé
+2026-09-11 16:02:55 | NOTIFICATION CRÉATION: Ticket TK-TVX2026-0005
+2026-09-11 16:02:55 | Total destinataires: 4
+2026-09-11 16:03:15 | To: ralijaonanirinarisoa@gmail.com | Subject: Nouveau ticket TK-TVX2026-0005 - TK-TVX20260911-20260911160230-1645 | Status: SUCCESS
+2026-09-11 16:03:15 | Email envoyé à : ralijaonanirinarisoa@gmail.com
+2026-09-11 16:03:31 | To: andriamiarintsoamirana@spider.mg | Subject: Nouveau ticket TK-TVX2026-0005 - TK-TVX20260911-20260911160230-1645 | Status: SUCCESS
+2026-09-11 16:03:31 | Email envoyé à : andriamiarintsoamirana@spider.mg
+2026-09-11 16:03:36 | To: andry@spider.mg | Subject: Nouveau ticket TK-TVX2026-0005 - TK-TVX20260911-20260911160230-1645 | Status: SUCCESS
+2026-09-11 16:03:36 | Email envoyé à : andry@spider.mg
+2026-09-11 16:03:42 | To: hery@spider.mg | Subject: Nouveau ticket TK-TVX2026-0005 - TK-TVX20260911-20260911160230-1645 | Status: SUCCESS
+2026-09-11 16:03:42 | Email envoyé à : hery@spider.mg
+2026-09-11 16:03:42 | 4 emails envoyés sur 4
+2026-09-11 16:03:42 | EmailManager initialisé
+2026-09-11 16:06:33 | EmailManager initialisé
+2026-09-11 16:24:30 | EmailManager initialisé
+2026-09-11 16:25:13 | EmailManager initialisé
+2026-09-11 16:25:55 | EmailManager initialisé
+2026-09-11 16:26:05 | EmailManager initialisé
+2026-09-11 16:27:41 | EmailManager initialisé
+2026-09-14 14:55:55 | EmailManager initialisé
+2026-09-14 14:56:14 | EmailManager initialisé
+2026-09-14 14:56:14 | NOTIFICATION CRÉATION: Ticket TK-ST2026-0002
+2026-09-14 14:56:14 | Total destinataires: 4
+2026-09-14 14:56:20 | To: ralijaonanirinarisoa@gmail.com | Subject: Nouveau ticket TK-ST2026-0002 - TK-BE20260914-20260914145557-4890 | Status: SUCCESS
+2026-09-14 14:56:20 | Email envoyé à : ralijaonanirinarisoa@gmail.com
+2026-09-14 14:56:25 | To: mirana@spider.mg | Subject: Nouveau ticket TK-ST2026-0002 - TK-BE20260914-20260914145557-4890 | Status: SUCCESS
+2026-09-14 14:56:25 | Email envoyé à : mirana@spider.mg
+2026-09-14 14:56:30 | To: maheryy@spider.mg | Subject: Nouveau ticket TK-ST2026-0002 - TK-BE20260914-20260914145557-4890 | Status: SUCCESS
+2026-09-14 14:56:30 | Email envoyé à : maheryy@spider.mg
+2026-09-14 14:56:34 | To: josoa@spider.mg | Subject: Nouveau ticket TK-ST2026-0002 - TK-BE20260914-20260914145557-4890 | Status: SUCCESS
+2026-09-14 14:56:34 | Email envoyé à : josoa@spider.mg
+2026-09-14 14:56:34 | 4 emails envoyés sur 4
+2026-09-14 14:56:34 | EmailManager initialisé
+2026-09-14 14:58:27 | EmailManager initialisé
+2026-09-14 14:58:39 | EmailManager initialisé
+2026-09-14 14:58:45 | To: ralijaonanirinarisoa@gmail.com | Subject: Ticket TK-ST2026-0002 - Assignation | Status: SUCCESS
+2026-09-14 14:58:45 | Email assignation envoyé à : ralijaonanirinarisoa@gmail.com
+2026-09-14 14:58:50 | To: mirana@spider.mg | Subject: Ticket TK-ST2026-0002 - Assignation | Status: SUCCESS
+2026-09-14 14:58:50 | Email assignation envoyé à : mirana@spider.mg
+2026-09-14 14:58:54 | To: maheryy@spider.mg | Subject: Ticket TK-ST2026-0002 - Assignation | Status: SUCCESS
+2026-09-14 14:58:54 | Email assignation envoyé à : maheryy@spider.mg
+2026-09-14 14:58:58 | To: josoa@spider.mg | Subject: Ticket TK-ST2026-0002 - Assignation | Status: SUCCESS
+2026-09-14 14:58:58 | Email assignation envoyé à : josoa@spider.mg
+2026-09-14 14:59:02 | To: faniry@spider.mg | Subject: Ticket TK-ST2026-0002 - Assignation | Status: SUCCESS
+2026-09-14 14:59:02 | Email assignation envoyé à : faniry@spider.mg
+2026-09-14 14:59:02 | 5 emails d'assignation envoyés
+2026-09-14 14:59:03 | WhatsApp assignation en file d'attente pour Josoa
+2026-09-14 14:59:03 | WhatsApp assignation en file d'attente pour Faniry
+2026-09-14 14:59:03 | EmailManager initialisé
+2026-09-14 14:59:43 | EmailManager initialisé
+2026-09-14 14:59:47 | To: ralijaonanirinarisoa@gmail.com | Subject: Ticket TK-ST2026-0002 - Assignation | Status: SUCCESS
+2026-09-14 14:59:47 | Email assignation envoyé à : ralijaonanirinarisoa@gmail.com
+2026-09-14 14:59:52 | To: mirana@spider.mg | Subject: Ticket TK-ST2026-0002 - Assignation | Status: SUCCESS
+2026-09-14 14:59:52 | Email assignation envoyé à : mirana@spider.mg
+2026-09-14 14:59:56 | To: maheryy@spider.mg | Subject: Ticket TK-ST2026-0002 - Assignation | Status: SUCCESS
+2026-09-14 14:59:56 | Email assignation envoyé à : maheryy@spider.mg
+2026-09-14 15:00:01 | To: josoa@spider.mg | Subject: Ticket TK-ST2026-0002 - Assignation | Status: SUCCESS
+2026-09-14 15:00:01 | Email assignation envoyé à : josoa@spider.mg
+2026-09-14 15:00:05 | To: onintsoa@spider.mg | Subject: Ticket TK-ST2026-0002 - Assignation | Status: SUCCESS
+2026-09-14 15:00:05 | Email assignation envoyé à : onintsoa@spider.mg
+2026-09-14 15:00:05 | 5 emails d'assignation envoyés
+2026-09-14 15:00:05 | WhatsApp assignation en file d'attente pour Josoa
+2026-09-14 15:00:05 | WhatsApp assignation en file d'attente pour Onintsoa
+2026-09-14 15:00:05 | EmailManager initialisé
+2026-09-14 15:01:36 | EmailManager initialisé
+2026-09-14 15:01:45 | EmailManager initialisé
+2026-09-14 15:01:50 | To: ralijaonanirinarisoa@gmail.com | Subject: Ticket résolu - Ticket TK-ST2026-0002 | Status: SUCCESS
+2026-09-14 15:01:50 | Email d'action envoyé à : ralijaonanirinarisoa@gmail.com
+2026-09-14 15:01:56 | To: mirana@spider.mg | Subject: Ticket résolu - Ticket TK-ST2026-0002 | Status: SUCCESS
+2026-09-14 15:01:56 | Email d'action envoyé à : mirana@spider.mg
+2026-09-14 15:02:01 | To: maheryy@spider.mg | Subject: Ticket résolu - Ticket TK-ST2026-0002 | Status: SUCCESS
+2026-09-14 15:02:01 | Email d'action envoyé à : maheryy@spider.mg
+2026-09-14 15:02:06 | To: josoa@spider.mg | Subject: Ticket résolu - Ticket TK-ST2026-0002 | Status: SUCCESS
+2026-09-14 15:02:06 | Email d'action envoyé à : josoa@spider.mg
+2026-09-14 15:02:12 | To: onintsoa@spider.mg | Subject: Ticket résolu - Ticket TK-ST2026-0002 | Status: SUCCESS
+2026-09-14 15:02:12 | Email d'action envoyé à : onintsoa@spider.mg
+2026-09-14 15:02:12 | 5 emails d'action envoyés
+2026-09-14 15:02:12 | WhatsApp en file d'attente pour Josoa (261320000000)
+2026-09-14 15:02:12 | EmailManager initialisé
+2026-09-14 15:02:40 | EmailManager initialisé
+2026-09-14 15:34:10 | EmailManager initialisé
+2026-09-14 15:34:13 | EmailManager initialisé
+2026-09-14 15:34:20 | To: ralijaonanirinarisoa@gmail.com | Subject: Ticket en attente - Ticket TK-ST2026-0002 | Status: SUCCESS
+2026-09-14 15:34:20 | Email d'action envoyé à : ralijaonanirinarisoa@gmail.com
+2026-09-14 15:34:26 | To: mirana@spider.mg | Subject: Ticket en attente - Ticket TK-ST2026-0002 | Status: SUCCESS
+2026-09-14 15:34:26 | Email d'action envoyé à : mirana@spider.mg
+2026-09-14 15:34:33 | To: maheryy@spider.mg | Subject: Ticket en attente - Ticket TK-ST2026-0002 | Status: SUCCESS
+2026-09-14 15:34:33 | Email d'action envoyé à : maheryy@spider.mg
+2026-09-14 15:34:38 | To: josoa@spider.mg | Subject: Ticket en attente - Ticket TK-ST2026-0002 | Status: SUCCESS
+2026-09-14 15:34:38 | Email d'action envoyé à : josoa@spider.mg
+2026-09-14 15:34:43 | To: onintsoa@spider.mg | Subject: Ticket en attente - Ticket TK-ST2026-0002 | Status: SUCCESS
+2026-09-14 15:34:43 | Email d'action envoyé à : onintsoa@spider.mg
+2026-09-14 15:34:43 | 5 emails d'action envoyés
+2026-09-14 15:34:43 | WhatsApp en file d'attente pour Josoa (261320000000)
+2026-09-14 15:34:43 | EmailManager initialisé
+2026-09-14 15:34:43 | EmailManager initialisé
+2026-09-14 15:49:55 | EmailManager initialisé
+2026-09-14 15:50:19 | EmailManager initialisé
+2026-09-14 15:50:22 | EmailManager initialisé
+2026-09-14 15:50:42 | EmailManager initialisé
+2026-09-14 15:58:22 | EmailManager initialisé
+2026-09-14 15:58:22 | EmailManager initialisé
+2026-09-14 16:00:38 | EmailManager initialisé
+2026-09-14 16:02:31 | EmailManager initialisé
+2026-09-14 16:09:20 | EmailManager initialisé
+2026-09-14 16:12:23 | EmailManager initialisé
+2026-09-14 16:27:22 | EmailManager initialisé
+2026-09-15 11:06:18 | EmailManager initialisé
+2026-09-15 11:06:26 | EmailManager initialisé
+2026-09-16 10:42:30 | EmailManager initialisé
+2026-09-16 15:39:31 | EmailManager initialisé
+2026-09-16 15:39:40 | EmailManager initialisé
+2026-09-16 16:09:14 | EmailManager initialisé
+2026-09-17 08:21:18 | EmailManager initialisé
+2026-09-17 08:21:22 | EmailManager initialisé
+2026-09-17 08:22:00 | EmailManager initialisé
+2026-09-17 08:26:46 | EmailManager initialisé
+2026-09-17 08:27:04 | EmailManager initialisé
+2026-09-17 08:27:30 | EmailManager initialisé
+2026-09-17 08:27:49 | EmailManager initialisé
+2026-09-17 08:27:50 | EmailManager initialisé
+2026-09-17 09:40:36 | To: tojo@spider.mg | Subject: Code de vérification – Changement de mot de passe | Status: SUCCESS
+2026-09-17 09:43:38 | To: dina@spider.mg | Subject: Code de vérification – Changement de mot de passe | Status: SUCCESS
+2026-09-17 09:44:34 | To: dina@spider.mg | Subject: Code de vérification – Changement de mot de passe | Status: SUCCESS
+2026-09-17 09:46:52 | To: ralijaonanirinarisoa@gmail.com | Subject: Code de vérification – Changement de mot de passe | Status: SUCCESS
+2026-09-17 14:24:03 | EmailManager initialisé
+2026-09-17 14:24:06 | EmailManager initialisé
+2026-09-17 14:24:53 | EmailManager initialisé
+2026-09-17 14:25:49 | EmailManager initialisé
+2026-09-17 14:25:49 | NOTIFICATION CRÉATION: Ticket TK-SAV2026-0002
+2026-09-17 14:25:49 | Total destinataires: 5
+2026-09-17 14:25:55 | To: ralijaonanirinarisoa@gmail.com | Subject: Nouveau ticket TK-SAV2026-0002 - TK-SAV20260917-20260917142503-7917 | Status: SUCCESS
+2026-09-17 14:25:55 | Email envoyé à : ralijaonanirinarisoa@gmail.com
+2026-09-17 14:26:00 | To: tojo@spider.mg | Subject: Nouveau ticket TK-SAV2026-0002 - TK-SAV20260917-20260917142503-7917 | Status: SUCCESS
+2026-09-17 14:26:00 | Email envoyé à : tojo@spider.mg
+2026-09-17 14:26:05 | To: mirana@spider.mg | Subject: Nouveau ticket TK-SAV2026-0002 - TK-SAV20260917-20260917142503-7917 | Status: SUCCESS
+2026-09-17 14:26:05 | Email envoyé à : mirana@spider.mg
+2026-09-17 14:26:09 | To: dina@spider.mg | Subject: Nouveau ticket TK-SAV2026-0002 - TK-SAV20260917-20260917142503-7917 | Status: SUCCESS
+2026-09-17 14:26:09 | Email envoyé à : dina@spider.mg
+2026-09-17 14:26:13 | To: miora@spider.mg | Subject: Nouveau ticket TK-SAV2026-0002 - TK-SAV20260917-20260917142503-7917 | Status: SUCCESS
+2026-09-17 14:26:13 | Email envoyé à : miora@spider.mg
+2026-09-17 14:26:13 | 5 emails envoyés sur 5
+2026-09-17 14:26:13 | EmailManager initialisé
+2026-09-17 14:27:16 | EmailManager initialisé
+2026-09-17 16:07:50 | EmailManager initialisé
+2026-09-17 16:07:57 | EmailManager initialisé
+2026-09-17 16:07:59 | EmailManager initialisé
+2026-09-17 16:08:51 | EmailManager initialisé
+2026-09-17 16:19:59 | EmailManager initialisé

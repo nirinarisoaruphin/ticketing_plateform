@@ -1,0 +1,13 @@
+# Empêche l'exécution de tout script PHP dans le dossier des uploads (sécurité)
+<FilesMatch "\.(php|phtml|php3|php4|php5|php7|pht|phar|cgi|pl)$">
+    Require all denied
+</FilesMatch>
+
+# Ancienne syntaxe Apache 2.2 (au cas où AllowOverride ne supporte pas Require)
+<IfModule !mod_authz_core.c>
+    <FilesMatch "\.(php|phtml|php3|php4|php5|php7|pht|phar|cgi|pl)$">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+</IfModule>
+
